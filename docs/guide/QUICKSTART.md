@@ -9,7 +9,7 @@
 
 ## 零、先确认你要哪种部署
 
-Nekolux 的运行时是一个 Node 程序，它通过 **ptrace 注入**把 hook 模块装进正在运行的 QQ。
+Nekolux 的运行时是一个 Node 程序，它通过 **ptrace 注入**把 注入模块装进正在运行的 QQ。
 所以有两种跑法：
 
 | 方式 | 适合 | 特点 |
@@ -38,8 +38,8 @@ Nekolux 的运行时是一个 Node 程序，它通过 **ptrace 注入**把 hook 
 
 | 平台 | 需要 |
 |---|---|
-| Windows | 已安装 QQ NT（9.9.x），**以管理员身份**运行 Nekolux（ptrace 等价权限） |
-| Linux | 已安装 QQ NT（3.2.x）、X 环境（桌面或 Xvfb）、`kernel.yama.ptrace_scope=0` |
+| Windows | 已安装 官方客户端（9.9.x），**以管理员身份**运行 Nekolux（ptrace 等价权限） |
+| Linux | 已安装 官方客户端（3.2.x）、X 环境（桌面或 Xvfb）、`kernel.yama.ptrace_scope=0` |
 
 ---
 
@@ -154,7 +154,7 @@ curl -X POST http://<宿主机IP>:3000/ \
 
 ### 4.1 Windows
 
-**前置**：已装 QQ NT（`C:\Program Files\Tencent\QQNT\versions\9.9.x`）。
+**前置**：已装 官方客户端（`C:\Program Files\Tencent\QQNT\versions\9.9.x`）。
 
 1. **以管理员身份**打开 PowerShell（ptrace 需要）
 2. 启动 QQ 并登录（保持运行）
@@ -173,7 +173,7 @@ node index.mjs
 
 ### 4.2 Linux
 
-**前置**：已装 QQ NT（3.2.x）、有 X 环境。
+**前置**：已装 官方客户端（3.2.x）、有 X 环境。
 
 ```bash
 # 1. 允许 ptrace（关键！否则注入会静默失败）
@@ -219,7 +219,7 @@ AstrBot / NoneBot / Koishi 等直接按 OneBot v11 接入即可。
 官方插件源**已内置**，打开 WebUI →「插件市场」就能看到：
 
 - `keyword-reply` 关键词自动回复
-- `packet-observer` 封包观察（演示原始封包 API）
+- `packet-observer` 协议包观察（演示原始协议包 API）
 - `webui-demo` WebUI 扩展演示
 
 安装后需要在「插件」页确认状态，并在容器/启动配置里把插件 ID 加进白名单

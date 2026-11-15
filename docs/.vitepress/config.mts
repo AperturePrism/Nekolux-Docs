@@ -3,23 +3,33 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
     lang: 'zh-CN',
     title: 'Nekolux',
-    description: 'Nekolux —— 进程外 hook 驱动的 QQ NT 协议框架',
+    description: 'Nekolux —— 轻量、可扩展的 OneBot v11 机器人运行时',
     base: '/',
     cleanUrls: true,
     lastUpdated: true,
+    sitemap: { hostname: 'https://Nekolux.aprism.top' },
 
     head: [
         ['link', { rel: 'icon', href: '/logo.png' }],
         ['meta', { name: 'theme-color', content: '#8561bd' }],
+
+        // ── SEO ──
+        // 刻意只描述「机器人运行时 / OneBot 协议端」这个层面，
+        // 不写具体宿主软件名、不写实现手法 —— 这些词会把站点暴露给
+        // 无关的搜索流量，也会让文档看起来像是针对特定厂商产品的工具。
+        ['meta', { name: 'description', content: 'Nekolux —— 轻量、可扩展的 OneBot v11 机器人运行时。插件化架构，支持 Windows / Linux / Docker 部署。' }],
+        ['meta', { name: 'keywords', content: 'OneBot,OneBot11,聊天机器人,机器人框架,插件系统,Docker 部署' }],
+        ['meta', { name: 'robots', content: 'index,follow' }],
+        ['link', { rel: 'canonical', href: 'https://Nekolux.aprism.top/' }],
+
+        // ── 社交卡片 ──
         ['meta', { property: 'og:type', content: 'website' }],
+        ['meta', { property: 'og:site_name', content: 'Nekolux' }],
         ['meta', { property: 'og:title', content: 'Nekolux 文档' }],
-        [
-            'meta',
-            {
-                property: 'og:description',
-                content: '进程外 hook 驱动 QQ NT，对外提供标准 OneBot v11 接口',
-            },
-        ],
+        ['meta', { property: 'og:description', content: '轻量、可扩展的 OneBot v11 机器人运行时。' }],
+        ['meta', { property: 'og:url', content: 'https://Nekolux.aprism.top/' }],
+        ['meta', { property: 'og:image', content: 'https://Nekolux.aprism.top/logo.png' }],
+        ['meta', { name: 'twitter:card', content: 'summary' }],
     ],
 
     themeConfig: {
@@ -29,14 +39,14 @@ export default defineConfig({
         nav: [
             { text: '指南', link: '/guide/QUICKSTART', activeMatch: '/guide/' },
             { text: '插件开发', link: '/plugins/PLUGIN-SYSTEM', activeMatch: '/plugins/' },
-            { text: '协议层', link: '/protocol/LINUX-HOOK-INVESTIGATION', activeMatch: '/protocol/' },
-            { text: '报告', link: '/reports/X64-CODEC-ALIVE-EXPERIMENT', activeMatch: '/reports/' },
+            { text: '技术笔记', link: '/protocol/LINUX-HOOK-INVESTIGATION', activeMatch: '/protocol/' },
+            { text: '验证记录', link: '/reports/X64-CODEC-ALIVE-EXPERIMENT', activeMatch: '/reports/' },
             {
                 text: '相关仓库',
                 items: [
                     { text: '主仓库', link: 'https://gitea.binbim.top/AperturePrism/Nekolux' },
-                    { text: '插件源', link: 'https://github.com/AperturePrism/Nekolux-Plugins' },
-                    { text: 'Gitea 镜像', link: 'https://gitea.binbim.top/AperturePrism/Nekolux' },
+                    { text: '插件源', link: 'https://plugins.aprism.top' },
+                    { text: '文档源码', link: 'https://github.com/AperturePrism/Nekolux-Docs' },
                 ],
             },
         ],

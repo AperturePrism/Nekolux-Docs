@@ -144,7 +144,7 @@ allowBuilds:
 
 ### 5.2 两边的版本策略差异
 
-**NapCat**：124 个版本硬编码偏移。当前 QQ 版本命中。**但如果 QQ 更新到表外版本，封包 hook 会直接失效**（不影响 NodeIKernel 那部分主路径）。
+**NapCat**：124 个版本硬编码偏移。当前 QQ 版本命中。**但如果 QQ 更新到表外版本，协议层拦截 会直接失效**（不影响 NodeIKernel 那部分主路径）。
 
 **SnowLuma**：`compat/qq.json` 是黑名单模型（`allowUnknown: true`），理论上任意新版本都能试。实测 9.9.31.49738 成功，说明它的动态定位策略在 QQ 9.9.x 上有效。
 

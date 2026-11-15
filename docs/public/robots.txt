@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 技术笔记与验证记录目录允许索引，但站点描述已脱敏
+Sitemap: https://Nekolux.aprism.top/sitemap.xml

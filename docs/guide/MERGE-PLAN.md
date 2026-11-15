@@ -20,11 +20,11 @@
 
 ```
 NapCat:    QQ 主进程 → NodeIKernel API → napcat-core → napcat-onebot → action
-SnowLuma:  QQ 进程 → 注入 DLL → 命名管道 → protocol(SSO) → core → onebot → action
+SnowLuma:  QQ 进程 → 注入模块 → 命名管道 → protocol(协议) → core → onebot → action
 ```
 
 `napcat-onebot` 的 214 个 action 全部依赖 `NapCatCore`（NodeIKernel session），
-SnowLuma 的 action 依赖 `BridgeInterface`（封包）。**没有共享层可以插进去。**
+SnowLuma 的 action 依赖 `BridgeInterface`（协议包）。**没有共享层可以插进去。**
 
 ---
 
@@ -100,17 +100,17 @@ NapCat 的 `napi2native.json` 硬编码了每个版本的偏移，表里没有�
 
 ### 3.3 解法
 
-实测发现 NapCat 的偏移是 **RVA**（不是 file offset），且 hook 点精确落在
+实测发现 NapCat 的偏移是 **RVA**（不是 file offset），且 拦截点精确落在
 **标准 x64 函数序言**上。这意味着可以用**字节特征**定位，不需要版本表。
 
 ### 3.4 结果
 
 ```bash
-$ pnpm resolve-offsets <wrapper.node>
+$ pnpm resolve-offsets <核心模块>
 
-[HIT] napcat.wrapper.send
+[HIT] napcat.核心模块.send
       file_offset=0xc3e22f  rva=0xc3ee2f  va=0x180c3ee2f  section=.text
-[HIT] napcat.wrapper.recv
+[HIT] napcat.核心模块.recv
       file_offset=0x24a5755  rva=0x24a6355  va=0x1824a6355  section=.text
 => 全部签名命中唯一，可直接用于 hook。
 ```
@@ -121,7 +121,7 @@ $ pnpm resolve-offsets <wrapper.node>
 
 ## 4. 两套偏移能力的分工（按你的要求）
 
-你要求「NapCat 逆向新 wrapper.node 算出偏移作为独立保留」。已实现：
+你要求「NapCat 逆向新 核心模块 算出偏移作为独立保留」。已实现：
 
 | | 签名扫描 | 偏移逆向 |
 |---|---|---|
@@ -168,7 +168,7 @@ pnpm resolve-offsets
 | SnowLuma 注入 | ✅ | ✅ |
 | SnowLuma 握手 | ✅ QHP1 | ✅ QHP1 |
 | NapCat 构建 | ✅ | — |
-| NapCat 封包 hook | ✅ 表内有版本 | ❌ 表内无版本 |
+| NapCat 协议层拦截 | ✅ 表内有版本 | ❌ 表内无版本 |
 
 ### 5.2 native-offsets
 
@@ -177,7 +177,7 @@ Test Files  3 passed (3)
      Tests  37 passed (37)
 ```
 
-包含对真实 117MB `wrapper.node` 的集成测试：
+包含对真实 117MB `核心模块` 的集成测试：
 
 - send 签名唯一命中 → RVA `0xc3ee2f` ✓ 与 NapCat 表一致
 - recv 签名唯一命中 → RVA `0x24a6355` ✓ 与 NapCat 表一致
@@ -196,7 +196,7 @@ Test Files  3 passed (3)
 
 | Action | 做法 |
 |---|---|
-| `set_custom_face_desc` | `modify_custom_face` 的别名 —— 同一个 OIDB 0x902e |
+| `set_custom_face_desc` | `modify_custom_face` 的别名 —— 同一个 二进制协议 0x902e |
 | `get_qzone_comment_list` | `get_qzone_msg_detail` 的别名 —— 同一份数据（含 commentlist 分页） |
 | `upload_images_to_qun_album` | 新实现：循环调用 `groupAlbum.upload`，逐张返回结果 |
 
@@ -204,10 +204,10 @@ Test Files  3 passed (3)
 
 | 优先级 | Action | 阻塞点 |
 |---|---|---|
-| P2 | `get_robot_uin_range` | 需逆向 NodeIKernel 的 RobotService 对应 OIDB |
+| P2 | `get_robot_uin_range` | 需逆向 NodeIKernel 的 RobotService 对应 二进制协议 |
 | P2 | 在线文件传输（5 个） | 需逆向 `OnlineApi` 的协议 |
 | P3 | `get_guild_list` / `get_guild_service_profile` | QQ 频道，需从零逆向协议 |
-| ❌ | `send_packet` | 依赖封包 hook，**Linux 3.2.35 不可用** |
+| ❌ | `send_packet` | 依赖协议层拦截，**Linux 3.2.35 不可用** |
 
 > **重要修正**：之前两次缺口分析都是错的。
 > 第一次说「23 个」，第二次说「13 个」，实际是 **12 个**（`set_custom_face_desc` 补上后剩 11 个，
@@ -261,15 +261,15 @@ NapCat 的插件系统是最有价值的独有资产。移植要点：
 
 - 生命周期：`plugin_init(ctx)` / `plugin_unload()` / 配置 schema
 - `ctx` 接口要**重新设计**：NapCat 的 `ctx.core` 是 `NapCatCore`（NodeIKernel），
-  SnowLuma 是 `BridgeInterface`（封包），语义不同
+  SnowLuma 是 `BridgeInterface`（协议包），语义不同
 - WebUI 要重新做（SnowLuma 用 React19+Tailwind，NapCat 用 HeroUI）
 
 ### 阶段 3：Linux 签名采集（已调查，结论：架构变更，不再推进）
 
 完整调查见 [`LINUX-HOOK-INVESTIGATION.md`](/protocol/LINUX-HOOK-INVESTIGATION)。
 
-**结论**：QQ Linux 3.2.35 把网络层搬到了主程序的 libuv，`wrapper.node` 不再参与网络 I/O。
-NapCat 的封包 hook 架构在 Linux 3.2.35 上已失效。
+**结论**：QQ Linux 3.2.35 把网络层搬到了主程序的 libuv，`核心模块` 不再参与网络 I/O。
+NapCat 的协议层拦截 架构在 Linux 3.2.35 上已失效。
 
 **但主路径（NodeIKernel）完全可用** —— 已在 VPS 上实测 NapCat v4.18.42 跑通
 （WebUI 6099、二维码登录、OneBot 网络适配均正常）。
@@ -289,14 +289,14 @@ NapCat 的封包 hook 架构在 Linux 3.2.35 上已失效。
 | 原生二进制无源码 | 🔴 | 两边都是预编译，失效无法自修 |
 | 许可限制 | 🟠 | 仅自用，公开需授权 |
 | 签名跨版本未验证 | 🟡 | 只有 9.9.36-53644 单版本实测 |
-| Linux 签名缺失 | 🟡 | 封包 hook 在 Linux 暂不可用 |
+| Linux 签名缺失 | 🟡 | 协议层拦截 在 Linux 暂不可用 |
 
 ### 关于「签名跨版本未验证」
 
 这是当前方案**最大的未知**。9.9.36-53644 上唯一命中，但没有第二个版本的
 二进制做对照。要真正确认跨版本稳定，需要：
 
-1. 拿到 9.9.35 或 9.9.37 的 `wrapper.node`
+1. 拿到 9.9.35 或 9.9.37 的 `核心模块`
 2. 跑 `pnpm resolve-offsets`
 3. 看是否仍唯一命中，且 RVA 与静态表一致
 

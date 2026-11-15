@@ -15,7 +15,7 @@ SnowLuma 完全没有插件系统，NapCat 有完整实现。这是两者最大�
 
 | 字段 | NapCat | 本项目 |
 |---|---|---|
-| `core` | `NapCatCore`（NodeIKernel session） | 不暴露（SnowLuma 走封包，没有 session 概念） |
+| `core` | `NapCatCore`（NodeIKernel session） | 不暴露（SnowLuma 走协议包，没有 session 概念） |
 | `oneBot` | `NapCatOneBot11Adapter` | 不暴露（用 `actions` 注册代替） |
 | `actions` | `ActionMap`（class 实例表） | `PluginActionRegistrar`（函数注册） |
 | `router` | Express | `PluginRouter`（框架无关的最小接口） |
@@ -150,7 +150,7 @@ await ctx.callAction('send_group_msg', {
 | 方案 | 问题 |
 |---|---|
 | 暴露 `bridge` / `oneBot` 实例 | 插件绕过 OneBot 抽象，直接操作协议层 |
-| 暴露原始封包发送 | 插件能构造任意 OIDB，安全边界消失 |
+| 暴露原始协议包发送 | 插件能构造任意 二进制协议，安全边界消失 |
 | **只暴露 `callAction`** | 插件复用 OneBot 的 214 个 action，能力完整且边界清晰 |
 
 **行为**：
@@ -163,9 +163,9 @@ await ctx.callAction('send_group_msg', {
 > **这是 v0.1 新增的能力**。最初的 `PluginContext` 只有 `actions`（注册）没有调用能力，
 > 导致「关键词自动回复」这类插件无法实现——插件能收到消息但没法回。实测发现后补上。
 
-### ctx.packets —— 原始封包监听
+### ctx.packets —— 原始协议层监听
 
-`callAction` 之上还有一层更底层的能力：**看得到 OneBot 事件之前的原始 SSO 包**。
+`callAction` 之上还有一层更底层的能力：**看得到 OneBot 事件之前的原始协议包**。
 
 ```js
 export function plugin_init(ctx) {
@@ -386,7 +386,7 @@ if (!registered) {
 
 **核心差异**：NapCat 插件能直接调 NodeIKernel 的能力（发消息、查群成员等）；本项目的插件**只能注册 action**，实际能力由 OneBot 层提供。
 
-这是架构决定的：SnowLuma 走封包，没有「session」这种能直接操作 QQ 的对象。
+这是架构决定的：SnowLuma 走协议包，没有「session」这种能直接操作 QQ 的对象。
 
 
 ---
@@ -485,7 +485,7 @@ export function plugin_init(ctx) {
 - 加载器：白名单、目录名校验、目录逃逸、敏感词、排序、日志
 - 管理器：生命周期、失败隔离、action 回滚、事件分发、配置持久化
 - action 注册表：保留名、重复注册、调用、排序
-- **原始封包**：订阅过滤（方向/命令/组合）、索引去重、卸载清理、异常隔离
+- **原始协议包**：订阅过滤（方向/命令/组合）、索引去重、卸载清理、异常隔离
   （`packets.test.ts` 12 个 + `manager-packets.test.ts` 7 个）
 - 沙箱：Worker 隔离、RPC 代理、超时与内存上限
 - 市场：索引校验、sha256、包体上限、安全 id
@@ -516,7 +516,7 @@ pnpm --filter @unified/plugin test
 > - WebUI 插件配置页（`/api/plugins/:id/config` + 动态表单）
 >
 > **已实现**（2026-11-15）：
-> - `ctx.packets` / `plugin_onpacket` —— 原始封包监听（见上文）
+> - `ctx.packets` / `plugin_onpacket` —— 原始协议层监听（见上文）
 > - `plugin_config_ui` + `PluginConfigUiController` —— 动态配置表单
 >   （`addField` / `removeField` / `updateField` / `updateSchema` / `show` / `hide`，
 >   变更经 `onConfigSchemaChange` 广播给 WebUI）

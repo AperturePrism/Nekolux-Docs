@@ -47,7 +47,7 @@
 
 ### 为什么 QQ 占这么多
 
-QQ NT 是 Electron 应用，本身就有主进程 + 渲染进程 + GPU 进程 + 多个 zygote，
+官方客户端 是 Electron 应用，本身就有主进程 + 渲染进程 + GPU 进程 + 多个 zygote，
 光框架开销就 400–500 MB。这部分**与 Nekolux 无关**——即使不用 Nekolux，
 在无头 Linux 上跑 QQ 也是这个量级。
 

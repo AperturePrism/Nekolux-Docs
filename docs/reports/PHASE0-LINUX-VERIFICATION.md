@@ -19,7 +19,7 @@
 | **SnowLuma 卸载** | ✅ | ✅ | 干净回收 |
 | NapCat shell 构建 | ✅ | 未测（仅构建配置检查） | — |
 | NapCat 原生模块加载 | ✅ | ✅ | MoeHoo + napi2native 均可加载 |
-| NapCat 封包 hook | ✅ 表内有 9.9.31-49738 | ❌ 表内无 3.2.35-54395 | **见 §4** |
+| NapCat 协议层拦截 | ✅ 表内有 9.9.31-49738 | ❌ 表内无 3.2.35-54395 | **见 §4** |
 
 ---
 
@@ -39,7 +39,7 @@
 ```
 QQ 版本: 3.2.35-54395  (构建 2026-10-28)
 真实下载地址: https://qqdl.gtimg.cn/qqfile/QQNT/9.9.37/beta/816b3c79/linuxqq_3.2.35-54395_amd64.deb
-wrapper.node: 152,431,496 B, ELF64, stripped
+核心模块: 152,431,496 B, ELF64, stripped
 WSLg: 可用 (DISPLAY=:0, WAYLAND_DISPLAY=wayland-0)
 ```
 
@@ -69,7 +69,7 @@ Linux 版的实现与 Windows 完全不同：`ptrace` 手动映射 + ELF64 解�
 
 ```
 pid 19920: likelyMainProcess=true   hasWrapperNode=true  hasMainRuntimeModule=true
-           matchedHints=["process:qq", "maps:wrapper.node"]
+           matchedHints=["process:qq", "maps:核心模块"]
 pid 19923: likelyMainProcess=false  (zygote, --type=zygote)
 pid 19924: likelyMainProcess=false  (zygote)
 ```
@@ -137,16 +137,16 @@ initHook(3.2.34-53644-x64) => Segmentation fault
 |---|---|
 | 搜索 20 个 NapCat fork 的偏移表 | 全部止于 3.2.34 |
 | 从 AUR / 腾讯 / Wayback 找 3.2.34 安装包 | 链接全部失效 |
-| 用 `wrapper.node` 的导出符号反查 | 885 个动态符号，但 hook 点在 stripped 区，无对应符号 |
+| 用 `核心模块` 的导出符号反查 | 885 个动态符号，但 hook 点在 stripped 区，无对应符号 |
 | `MSF::MSFSDK::sendPacket` 等符号 | 存在于 0x670DD20，但与 NapCat 的偏移模式不符 |
 
 ### 4.4 结论
 
-**NapCat 的 Linux 封包 hook 依赖人工维护的版本偏移表。表里没有你的 QQ 版本时，无法使用。**
+**NapCat 的 Linux 协议层拦截 依赖人工维护的版本偏移表。表里没有你的 QQ 版本时，无法使用。**
 
-这是 NapCat 架构的固有弱点：每次 QQ 更新，需要有人用 IDA/Ghidra 逆向新版本的 `wrapper.node`，找到 send/recv 函数，算出偏移，提交 PR。**上游已死，这个工作现在没人做。**
+这是 NapCat 架构的固有弱点：每次 QQ 更新，需要有人用 IDA/Ghidra 逆向新版本的 `核心模块`，找到 send/recv 函数，算出偏移，提交 PR。**上游已死，这个工作现在没人做。**
 
-> 补充：NapCat 的主路径（NodeIKernel API）**不走封包 hook**，所以即使 `napi2native` 失效，NapCat 大部分功能仍可用。但这条路依赖「改 QQ 的 package.json 在进程内运行」，在 Linux 上同样可行（我实测 QQ 能用这种方式启动并执行自定义代码）。
+> 补充：NapCat 的主路径（NodeIKernel API）**不走协议层拦截**，所以即使 `napi2native` 失效，NapCat 大部分功能仍可用。但这条路依赖「改 QQ 的 package.json 在进程内运行」，在 Linux 上同样可行（我实测 QQ 能用这种方式启动并执行自定义代码）。
 
 ---
 
@@ -155,7 +155,7 @@ initHook(3.2.34-53644-x64) => Segmentation fault
 | 维度 | SnowLuma | NapCat |
 |---|---|---|
 | 注入方式 | `ptrace` 外部注入 | 改 `package.json` 进程内加载 |
-| 需要 QQ 版本表 | ❌ 不需要 | ✅ 需要（封包 hook 部分） |
+| 需要 QQ 版本表 | ❌ 不需要 | ✅ 需要（协议层拦截 部分） |
 | QQ 更新后 | 通常直接可用 | 需要人工逆向新偏移 |
 | Linux 支持 | 原生实现（procfs + ELF64） | 有二进制，但依赖版本表 |
 | 进程隔离 | 独立进程，崩溃不拖死 QQ | 在 QQ 进程内，崩溃即 QQ 崩溃 |
@@ -190,7 +190,7 @@ Linux QQ 的官方下载页给出的还是 2025-06 的 3.2.18 链接，且**全�
 | **QQ 版本覆盖** | ✅ 9.9.31-49738 在表内 | ⚠️ 3.2.35-54395 不在表内 |
 
 **SnowLuma 路线在 Linux 上通过全部验证。**
-**NapCat 路线在 Linux 上受限于版本偏移表，需要逆向工作才能用封包 hook。**
+**NapCat 路线在 Linux 上受限于版本偏移表，需要逆向工作才能用协议层拦截。**
 
 ---
 

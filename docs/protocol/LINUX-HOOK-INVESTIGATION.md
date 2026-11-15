@@ -2,19 +2,19 @@
 
 > 调查日期：2026-11-13
 > 环境：阿里云 VPS（Debian 12，x86_64，2核2G）· QQ Linux 3.2.35-54395
-> 结论：~~Linux 3.2.35 上 NapCat 的封包 hook 架构已失效~~
-> **【2026-11-15 修正】封包 hook 架构未失效——本文把「系统调用位置」误读成了「codec 不参与」。修正见 §十 与 [reports/X64-CODEC-ALIVE-EXPERIMENT.md](/reports/X64-CODEC-ALIVE-EXPERIMENT)**
+> 结论：~~Linux 3.2.35 上 NapCat 的协议层拦截 架构已失效~~
+> **【2026-11-15 修正】协议层拦截 架构未失效——本文把「系统调用位置」误读成了「codec 不参与」。修正见 §十 与 [reports/X64-CODEC-ALIVE-EXPERIMENT.md](/reports/X64-CODEC-ALIVE-EXPERIMENT)**
 
 ---
 
 ## 一、一句话结论
 
-~~**NapCat 的 Linux 封包 hook 依赖 `wrapper.node` 内的函数偏移。QQ 3.2.35 把网络层搬到了主程序的 libuv 里，`wrapper.node` 不再参与网络 I/O，因此偏移表失效。**~~
+~~**NapCat 的 Linux 协议层拦截 依赖 `核心模块` 内的函数偏移。QQ 3.2.35 把网络层搬到了主程序的 libuv 里，`核心模块` 不再参与网络 I/O，因此偏移表失效。**~~
 
 **【2026-11-15 修正】** 3.2.35 是**两层分工**，不是迁移：
 
 ```
-wrapper.node codec 层：协议编解码 + 加解密（packet send/recv 函数）
+核心模块 codec 层：协议编解码 + 加解密（packet send/recv 函数）
         ↓ 编码后的字节
 主程序 libuv：系统调用（socket write/recv）
         ↓
@@ -29,7 +29,7 @@ wrapper.node codec 层：协议编解码 + 加解密（packet send/recv 函数�
 
 ## 二、实测证据
 
-### 2.1 `wrapper.node` 不参与网络
+### 2.1 `核心模块` 不参与网络
 
 用 LD_PRELOAD 拦截 `write` / `writev` / `connect`，记录完整调用栈（`backtrace()`），解析每个返回地址所属模块：
 
@@ -39,7 +39,7 @@ wrapper.node codec 层：协议编解码 + 加解密（packet send/recv 函数�
 | `libxcb` / `libX11` | 500+ | X11 图形 |
 | `libc` | 250+ | 系统调用 |
 | `libdbus` | 25 | D-Bus |
-| **`wrapper.node`** | **仅 X11 路径** | 不参与网络 |
+| **`核心模块`** | **仅 X11 路径** | 不参与网络 |
 
 关键记录：
 
@@ -49,12 +49,12 @@ W 83 153 <hook> <hook> 0x55b4e7cf759d
 # 0x55b4e7cf759d → qq +0x2a9159d → libuv 的 uv__stream 内部
 ```
 
-`wrapper.node` 出现的所有记录都是 `libX11 → libxcb → wrapper.node` 的渲染路径。
+`核心模块` 出现的所有记录都是 `libX11 → libxcb → 核心模块` 的渲染路径。
 
-### 2.2 `wrapper.node` 的网络能力是"备用"的
+### 2.2 `核心模块` 的网络能力是"备用"的
 
 ```bash
-$ nm -D -u wrapper.node | grep -E "uv_|send|recv|connect"
+$ nm -D -u 核心模块 | grep -E "uv_|send|recv|connect"
 U connect@GLIBC_2.2.5
 U send@GLIBC_2.2.5
 U recv@GLIBC_2.2.5
@@ -75,29 +75,29 @@ U uv_write
 | `wrapper` 内 `uv_write@plt` 调用点 | `wrapper+0x89f409b` | ❌ 未命中 |
 | `wrapper` 内 `uv_write@plt` 调用点 | `wrapper+0x34cbaae` | HTTP 服务器，非 SSO |
 
-### 2.4 `wrapper.node` 只做协议编解码
+### 2.4 `核心模块` 只做协议编解码
 
 ```bash
-$ strings wrapper.node | grep -c "^trpc\."
+$ strings 核心模块 | grep -c "^trpc\."
 240
 ```
 
-有 240 个 SSO 命令字符串（`trpc.login.ecdh...`、`OidbSvcTrpcTcp.0x...`），但：
+有 240 个 协议命令字符串（`trpc.login.ecdh...`、`OidbSvcTrpcTcp.0x...`），但：
 - 这些字符串在 `.rodata`，没有直接的 `lea` 引用
 - 对应的函数在 `.text` 里没有导出符号
 - 运行时断点证明它们不发网络包
 
-**判断**：`wrapper.node` 提供 `NodeIQQNTWrapperSession` 等 API 给主程序，负责**协议序列化/反序列化**；网络收发由主程序的 libuv 负责。
+**判断**：`核心模块` 提供 `NodeIQQNTWrapperSession` 等 API 给主程序，负责**协议序列化/反序列化**；网络收发由主程序的 libuv 负责。
 
 ---
 
 ## 三、架构对比
 
-| 平台 | 网络层位置 | 封包 hook 可行性 |
+| 平台 | 网络层位置 | 协议层拦截 可行性 |
 |---|---|---|
-| Windows 9.9.x | `wrapper.node` 的 `MSFSDK` | ✅ 有偏移表，已验证 |
-| Linux 3.2.34 及更早 | `wrapper.node`（NapCat 表有数据） | ✅ 推测可用 |
-| **Linux 3.2.35** | codec 在 `wrapper.node`，I/O 在主程序 libuv | ✅ **【11-15 修正】codec 层存活，签名可用**（原判 ❌ 作废） |
+| Windows 9.9.x | `核心模块` 的 `MSFSDK` | ✅ 有偏移表，已验证 |
+| Linux 3.2.34 及更早 | `核心模块`（NapCat 表有数据） | ✅ 推测可用 |
+| **Linux 3.2.35** | codec 在 `核心模块`，I/O 在主程序 libuv | ✅ **【11-15 修正】codec 层存活，签名可用**（原判 ❌ 作废） |
 
 ### 调用链（3.2.35 实测）
 
@@ -111,7 +111,7 @@ libc write() / send()
 内核
 ```
 
-`wrapper.node` 在**应用层的协议编解码**位置，不在 I/O 路径上。
+`核心模块` 在**应用层的协议编解码**位置，不在 I/O 路径上。
 
 ---
 
@@ -132,7 +132,7 @@ libc write() / send()
 |---|---|
 | 拿到明文 `cmd` / `seq` / `body` | 加密层在主程序的 Node.js 里，无符号 |
 | 复现 `send_packet` | 需要构造合法 SSO 包（加密 + 序列号 + 会话状态） |
-| 复用 NapCat 偏移表 | 偏移指向 `wrapper.node`，但网络不在那里 |
+| 复用 NapCat 偏移表 | 偏移指向 `核心模块`，但网络不在那里 |
 
 ### 为什么不再深入
 
@@ -157,9 +157,9 @@ NapCat Shell App Loading...
 
 **结论**：NodeIKernel 路径在 Linux 3.2.35 上完全正常，WebUI、二维码登录、OneBot 网络适配都能跑。
 
-封包 hook 缺失只影响：
+协议层拦截 缺失只影响：
 - `send_packet`（裸包发送）
-- 少数需要直接构造 OIDB 包的能力
+- 少数需要直接构造 二进制协议 包的能力
 
 ---
 
@@ -223,11 +223,11 @@ x11vnc -display :99 -forever -shared -nopw -rfbport 5900 &
 
 ## 八、对项目的建议
 
-> 【2026-11-15 修正】基于 §十 的实验结论重写；原建议（"Linux 上不追求封包 hook"）作废。
+> 【2026-11-15 修正】基于 §十 的实验结论重写；原建议（"Linux 上不追求协议层拦截"）作废。
 
 ### 短期
 
-1. **Linux 封包 hook 恢复可行** —— codec 层存活已证实，签名已整合进 `packages/native-offsets`（napi send/recv + packet send/recv，ELF x64，3.2.35-54395 端到端验证与 fork 表值三方吻合）
+1. **Linux 协议层拦截 恢复可行** —— codec 层存活已证实，签名已整合进 `packages/native-offsets`（napi send/recv + packet send/recv，ELF x64，3.2.35-54395 端到端验证与 fork 表值三方吻合）
 2. **Windows 保持现状** —— 签名已验证，偏移表可用
 3. **文档标注平台差异** —— napi 层 recv 的活 stub 待同族索引定位（见下）
 
@@ -257,12 +257,12 @@ x11vnc -display :99 -forever -shared -nopw -rfbport 5900 &
 
 | 本文原判断 | 修正 | 证据 |
 |---|---|---|
-| §2.1 "wrapper.node 不参与网络" | 数据正确，解读错误：**系统调用**在主程序 libuv，**编解码**仍在 wrapper.node | uprobe：packet send/recv 7 分钟各 39 命中、39:39 对称 |
-| §2.2 "网络 API 导入了但没被用" | wrapper.node 确不经手系统调用——codec 层本就不该出现在 syscall 栈上，此条不能作为失效证据 | 分层模型（§一） |
+| §2.1 "核心模块 不参与网络" | 数据正确，解读错误：**系统调用**在主程序 libuv，**编解码**仍在 核心模块 | uprobe：packet send/recv 7 分钟各 39 命中、39:39 对称 |
+| §2.2 "网络 API 导入了但没被用" | 核心模块 确不经手系统调用——codec 层本就不该出现在 syscall 栈上，此条不能作为失效证据 | 分层模型（§一） |
 | §2.3 "NapCat 两个 hook 点均未命中" | 探测的偏移（`wrapper+0x670dd20`）不是表值——3.2.35 x64 的 napi send 是 `0x6EBE4D0`、packet send 是 `0x665CC80`；正确地址的 uprobe 全部命中 | fork napi2native.json / packet.json 3.2.35-54395-x64 条目 + 字节复核 |
 | §2.4 "不发网络包" | codec 层不发**系统调用**，但收发**封包字节流**——MoeHoo 式 hook 挂的就是这一层 | 39:39 对称命中 |
 | §四 "拿不到明文 cmd/seq/body" | 加解密在 codec 层（有签名可定位），不在主程序 Node.js | packet.json 的 MoeHoo 监听即取明文 |
 | §四 "复现 send_packet 成本极高" | 调用 packet send 函数入口（签名唯一命中）即可构造裸包 | NapCat 同机制 |
 | §五 "缺 send_packet" | 缺口可补 | 同上 |
 
-实验本身零账号（登录页自主流量）、纯内核被动 uprobes、未修改进程内存；QQ 全程存活、crashpad 零新增 dump。另：本文 §七 的坑表之外补充两条——**内核 tracefs uprobe_events 的裸地址是文件偏移而非 vaddr**（wrapper.node RX 段两者差 0x1000，签错位置全零命中），以及**该 VPS 有宝塔定时任务每日 02:00/12:00 重启**（长实验窗口必被杀，曾一度被误判为探针致 QQ 死亡）。
+实验本身零账号（登录页自主流量）、纯内核被动 uprobes、未修改进程内存；QQ 全程存活、crashpad 零新增 dump。另：本文 §七 的坑表之外补充两条——**内核 tracefs uprobe_events 的裸地址是文件偏移而非 vaddr**（核心模块 RX 段两者差 0x1000，签错位置全零命中），以及**该 VPS 有宝塔定时任务每日 02:00/12:00 重启**（长实验窗口必被杀，曾一度被误判为探针致 QQ 死亡）。
