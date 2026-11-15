@@ -8,7 +8,7 @@
 
 *上游在，学上游；上游没了，自己扛。*
 
-[![License](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-orange)](https://github.com/AperturePrism/Nekolux/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-orange)](https://gitea.binbim.top/AperturePrism/Nekolux/blob/main/LICENSE.md)
 [![OneBot](https://img.shields.io/badge/OneBot-v11-black)](https://github.com/botuniverse/onebot-11)
 [![QQ](https://img.shields.io/badge/QQ-Win_9.9.36·Linux_3.2.28-12B7F5?logo=tencentqq&logoColor=white)](https://im.qq.com)
 [![Tests](https://img.shields.io/badge/tests-125_passing-brightgreen)](#-实测与验证)
@@ -96,7 +96,7 @@ docker run -d --name nekolux \
 # 3️⃣ VNC 连 :5902 扫码 → OneBot 起在 :3000 (HTTP) / :3001 (WS)，WebUI 在 :5099
 ```
 
-详见 [`docker/README.md`](https://github.com/AperturePrism/Nekolux/tree/main/docker)。
+详见 [`docker/README.md`](https://gitea.binbim.top/AperturePrism/Nekolux/tree/main/docker)。
 
 ### 源码开发
 
@@ -132,7 +132,7 @@ export function plugin_init(ctx) {
 - **热重载**：绕过 ESM 缓存，改完即刷
 - **市场**：本地列表 + 远端索引一键安装（sha256 校验 / 大小限制 / 失败清理）
 
-示例插件：[`examples/plugins/keyword-reply/`](https://github.com/AperturePrism/Nekolux/tree/main/examples/plugins/keyword-reply)（关键词自动回复）
+示例插件：[`examples/plugins/keyword-reply/`](https://gitea.binbim.top/AperturePrism/Nekolux/tree/main/examples/plugins/keyword-reply)（关键词自动回复）
 · 完整文档：[`docs/PLUGIN-SYSTEM.md`](/plugins/PLUGIN-SYSTEM)
 
 ## 🗂️ 仓库结构
@@ -203,14 +203,14 @@ Docker 容器（或裸机）
 | 🧩 [PLUGIN-SYSTEM](/plugins/PLUGIN-SYSTEM) | 插件系统全文档（16 节：契约 / 沙箱 / 市场 / 热重载） |
 | 🔬 [OFFSET-MAINTENANCE](/protocol/OFFSET-MAINTENANCE) | 签名采集 → 交叉验证 → 落地全流程 |
 | 🐧 [LINUX-HOOK-INVESTIGATION](/protocol/LINUX-HOOK-INVESTIGATION) | Linux 3.2.35 网络层迁移调查 |
-| 🐳 [docker/README](https://github.com/AperturePrism/Nekolux/tree/main/docker) | 部署 / 登录 / 端口 / ptrace_scope 排坑 |
+| 🐳 [docker/README](https://gitea.binbim.top/AperturePrism/Nekolux/tree/main/docker) | 部署 / 登录 / 端口 / ptrace_scope 排坑 |
 | 📊 [RUNTIME-ASSEMBLY](/guide/RUNTIME-ASSEMBLY) | bootstrap 装配层设计 |
 | 👥 [MULTI-ACCOUNT](/guide/MULTI-ACCOUNT) | 多账号架构 + 双容器方案 |
 | 📜 [reports/](/reports/X64-CODEC-ALIVE-EXPERIMENT) | 架构分析 + 两轮阶段 0 验证原始报告 |
 
 ## 🔐 授权说明
 
-> **License：PolyForm Noncommercial 1.0.0（详见 [LICENSE.md](https://github.com/AperturePrism/Nekolux/blob/main/LICENSE.md)）**
+> **License：PolyForm Noncommercial 1.0.0（详见 [LICENSE.md](https://gitea.binbim.top/AperturePrism/Nekolux/blob/main/LICENSE.md)）**
 
 授权分两部分，边界说清楚：
 

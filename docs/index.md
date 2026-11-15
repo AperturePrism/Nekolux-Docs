@@ -17,7 +17,7 @@ hero:
       link: /plugins/PLUGIN-SYSTEM
     - theme: alt
       text: GitHub
-      link: https://github.com/AperturePrism/Nekolux
+      link: https://gitea.binbim.top/AperturePrism/Nekolux
 
 features:
   - icon: 🧩

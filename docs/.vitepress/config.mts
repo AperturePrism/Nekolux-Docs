@@ -34,7 +34,7 @@ export default defineConfig({
             {
                 text: '相关仓库',
                 items: [
-                    { text: '主仓库', link: 'https://github.com/AperturePrism/Nekolux' },
+                    { text: '主仓库', link: 'https://gitea.binbim.top/AperturePrism/Nekolux' },
                     { text: '插件源', link: 'https://github.com/AperturePrism/Nekolux-Plugins' },
                     { text: 'Gitea 镜像', link: 'https://gitea.binbim.top/AperturePrism/Nekolux' },
                 ],
@@ -58,6 +58,7 @@ export default defineConfig({
                         { text: 'NAS 部署', link: '/guide/NAS-DEPLOYMENT' },
                         { text: '运行时装配', link: '/guide/RUNTIME-ASSEMBLY' },
                         { text: '多账号', link: '/guide/MULTI-ACCOUNT' },
+                        { text: '资源占用', link: '/guide/RESOURCE-USAGE' },
                     ],
                 },
                 {
@@ -114,7 +115,7 @@ export default defineConfig({
         },
 
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/AperturePrism/Nekolux' },
+            { icon: 'github', link: 'https://gitea.binbim.top/AperturePrism/Nekolux' },
         ],
 
         search: {

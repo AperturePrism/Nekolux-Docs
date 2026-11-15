@@ -57,19 +57,23 @@ echo 'kernel.yama.ptrace_scope=0' | sudo tee -a /etc/sysctl.conf
 
 ### 2.3 准备运行时
 
-**方式 A：下载发行包**
+**方式 A：用现成的发行包**
+
+> 主仓库托管在私有 Gitea，发行包不对外公开。有访问权限的话：
 
 ```bash
 mkdir -p ~/nekolux && cd ~/nekolux
-wget https://github.com/AperturePrism/Nekolux/releases/download/v<版本>/nekolux-<版本>-linux-x64.tar.gz
+# 从 Gitea Releases 页面下载后解压
 tar xzf nekolux-<版本>-linux-x64.tar.gz
 # 得到 nekolux-dist/
 ```
 
+没有权限就直接用方式 B 从源码构建。
+
 **方式 B：从源码构建**
 
 ```bash
-git clone https://github.com/AperturePrism/Nekolux.git
+git clone https://gitea.binbim.top/AperturePrism/Nekolux.git
 cd Nekolux
 pnpm install
 

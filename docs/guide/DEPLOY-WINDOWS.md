@@ -36,11 +36,15 @@ Nekolux 通过 ptrace 等价机制注入 QQ 进程，**必须管理员权限**�
 
 ## 二、获取运行时
 
-### 方式 A：下载发行包
+### 方式 A：用现成的发行包
 
-1. 打开 [Releases](https://github.com/AperturePrism/Nekolux/releases)
-2. 下载 `nekolux-<版本>-win32-x64.zip`
-3. 解压到比如 `D:\Nekolux\nekolux-dist`
+> 主仓库目前托管在私有 Gitea，**发行包不对外公开下载**。有仓库访问权限的话：
+>
+> 1. 打开 [Releases](https://gitea.binbim.top/AperturePrism/Nekolux/releases)
+> 2. 下载 `nekolux-<版本>-win32-x64.zip`
+> 3. 解压到比如 `D:\Nekolux\nekolux-dist`
+>
+> 没有权限就直接用方式 B 从源码构建 —— 流程完全一样。
 
 检查目录结构：
 
@@ -67,7 +71,7 @@ Get-ChildItem D:\Nekolux\nekolux-dist\native | Where-Object Name -like "*win32*"
 ### 方式 B：从源码构建
 
 ```powershell
-git clone https://github.com/AperturePrism/Nekolux.git
+git clone https://gitea.binbim.top/AperturePrism/Nekolux.git
 cd Nekolux
 pnpm install
 

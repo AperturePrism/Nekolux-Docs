@@ -49,7 +49,7 @@ Nekolux 的运行时是一个 Node 程序，它通过 **ptrace 注入**把 hook 
 
 ### 2.1 用发行包（最快）
 
-从 [Releases](https://github.com/AperturePrism/Nekolux/releases) 下载对应平台的压缩包，
+从 [Releases](https://gitea.binbim.top/AperturePrism/Nekolux/releases) 下载对应平台的压缩包，
 解压得到 `nekolux-dist/`，里面有：
 
 ```
@@ -66,7 +66,7 @@ nekolux-dist/
 需要 **Node 24.22.1+** 和 **pnpm 11.25.0**：
 
 ```bash
-git clone https://github.com/AperturePrism/Nekolux.git
+git clone https://gitea.binbim.top/AperturePrism/Nekolux.git
 cd Nekolux
 pnpm install
 
