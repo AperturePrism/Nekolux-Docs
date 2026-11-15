@@ -1,0 +1,108 @@
+# 许可证
+
+## 本仓库代码与文档：PolyForm Noncommercial License 1.0.0
+
+本仓库中的**原创内容**（`packages/`、`docker/`、`tools/`、`docs/`、`examples/` 等，
+均为本项目的独立实现，不含 SnowLuma / NapCat 源码）依
+**PolyForm Noncommercial License 1.0.0** 发布：
+
+- ✅ 任何**非商业**用途：使用、修改、分发、做衍生作品
+- ✅ 个人学习、研究、娱乐、爱好项目；非营利组织、教育机构使用
+- ❌ 商业用途（需要商用请另行联系作者授权）
+- 分发时必须附上本许可文本或其 URL，并保留下方的 Required Notice
+
+> SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+>
+> Required Notice: Copyright (c) 2026 AperturePrism (https://gitea.binbim.top/AperturePrism)
+
+完整许可文本见 <https://polyformproject.org/licenses/noncommercial/1.0.0>，全文附于文末。
+
+## 第三方组件声明（NOTICE）
+
+**本仓库不包含、也不分发任何第三方项目源码。** 以下组件不在上述许可范围内：
+
+| 组件 | 状态 |
+|---|---|
+| SnowLuma 运行时（及其修改版） | **不在本仓库内**。其原始许可为 source-available：禁止商用、禁止公开发布修改版。本项目的运行时是 SnowLuma 的修改版，**不得随本仓库公开分发** —— 使用者需自行从原始项目构建，并自行承担合规责任 |
+| NapCat | 本仓库未使用其代码。插件系统设计参考其公开行为，属于独立实现 |
+| QQ 客户端（腾讯） | 本项目通过 hook 方式对接 QQ 客户端，仅供个人学习研究，使用者需自行遵守腾讯服务协议 |
+| `mlikiowa/napcat-docker`（Docker 基础镜像） | 仅作为构建基底引用，按其自身许可使用 |
+
+> **警告**：本项目是对 QQ 客户端的逆向对接，存在账号风控风险，仅供个人学习研究，
+> 不得用于任何商业或大规模用途。使用产生的一切后果由使用者自行承担。
+
+---
+
+## PolyForm Noncommercial License 1.0.0 全文
+
+<https://polyformproject.org/licenses/noncommercial/1.0.0>
+
+### Acceptance
+
+In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
+
+### Copyright License
+
+The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose.  However, you may only distribute the software according to [Distribution License](#distribution-license) and make changes or new works based on the software according to [Changes and New Works License](#changes-and-new-works-license).
+
+### Distribution License
+
+The licensor grants you an additional copyright license to distribute copies of the software.  Your license to distribute covers distributing the software with changes and new works permitted by [Changes and New Works License](#changes-and-new-works-license).
+
+### Notices
+
+You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL for them above, as well as copies of any plain-text lines beginning with `Required Notice:` that the licensor provided with the software.  For example:
+
+> Required Notice: Copyright Yoyodyne, Inc. (http://example.com)
+
+### Changes and New Works License
+
+The licensor grants you an additional copyright license to make changes and new works based on the software for any permitted purpose.
+
+### Patent License
+
+The licensor grants you a patent license for the software that covers patent claims the licensor can license, or becomes able to license, that you would infringe by using the software.
+
+### Noncommercial Purposes
+
+Any noncommercial purpose is a permitted purpose.
+
+### Personal Uses
+
+Personal use for research, experiment, and testing for the benefit of public knowledge, personal study, private entertainment, hobby projects, amateur pursuits, or religious observance, without any anticipated commercial application, is use for a permitted purpose.
+
+### Noncommercial Organizations
+
+Use by any charitable organization, educational institution, public research organization, public safety or health organization, environmental protection organization, or government institution is use for a permitted purpose regardless of the source of funding or obligations resulting from the funding.
+
+### Fair Use
+
+You may have "fair use" rights for the software under the law. These terms do not limit them.
+
+### No Other Rights
+
+These terms do not allow you to sublicense or transfer any of your licenses to anyone else, or prevent the licensor from granting licenses to anyone else.  These terms do not imply any other licenses.
+
+### Patent Defense
+
+If you make any written claim that the software infringes or contributes to infringement of any patent, your patent license for the software granted under these terms ends immediately. If your company makes such a claim, your patent license ends immediately for work on behalf of your company.
+
+### Violations
+
+The first time you are notified in writing that you have violated any of these terms, or done anything with the software not covered by your licenses, your licenses can nonetheless continue if you come into full compliance with these terms, and take practical steps to correct past violations, within 32 days of receiving notice.  Otherwise, all your licenses end immediately.
+
+### No Liability
+
+***As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.***
+
+### Definitions
+
+The **licensor** is the individual or entity offering these terms, and the **software** is the software the licensor makes available under these terms.
+
+**You** refers to the individual or entity agreeing to these terms.
+
+**Your company** is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization.  **Control** means ownership of substantially all the assets of an entity, or the power to direct its management and policies by vote, contract, or otherwise.  Control can be direct or indirect.
+
+**Your licenses** are all the licenses granted to you for the software under these terms.
+
+**Use** means anything you do with the software requiring one of your licenses.
