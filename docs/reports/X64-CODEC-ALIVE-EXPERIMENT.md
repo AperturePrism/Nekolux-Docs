@@ -2,14 +2,14 @@
 
 > 日期：2026-11-15
 > 环境：Aliyun VPS（Debian, kernel 6.1.0-33-amd64）· x86_64 · QQ Linux 3.2.35-54395（deb 解包，未系统安装）
-> 结论：**核心模块 编解码层在 x64 3.2.35 上完全存活 —— "x64 结构性失效"结论被推翻，NapCat 式 packet hook 在 Linux x64 上可行**
+> 结论：**wrapper.node 编解码层在 x64 3.2.35 上完全存活 —— "x64 结构性失效"结论被推翻，NapCat 式 packet hook 在 Linux x64 上可行**
 > 账号安全：全程零登录（仅登录页自主流量），纯内核被动 uprobes，未修改进程内存
 
 ---
 
 ## 一、背景
 
-此前 strace 观察到 3.2.35 x64 的 socket 系统调用发生在主程序 `qq`（libuv）中而非 `核心模块`，据此曾推测"编解码函数已不在此架构调用链上"。但 strace 只证明了**系统调用位置**，不证明 **codec 函数是否仍处理全部流量**——主程序负责 I/O、核心模块 负责编解码完全兼容该观察。本实验用内核 uprobes 直接验证 codec 函数是否仍在调用链上。
+此前 strace 观察到 3.2.35 x64 的 socket 系统调用发生在主程序 `qq`（libuv）中而非 `wrapper.node`，据此曾推测"编解码函数已不在此架构调用链上"。但 strace 只证明了**系统调用位置**，不证明 **codec 函数是否仍处理全部流量**——主程序负责 I/O、wrapper.node 负责编解码完全兼容该观察。本实验用内核 uprobes 直接验证 codec 函数是否仍在调用链上。
 
 ## 二、方法
 
@@ -33,7 +33,7 @@
 | 文件偏移（vaddr − gap） | **400/400** |
 | vaddr | 0/400 |
 
-**内核 `uprobe_events` 的裸地址按文件偏移解释**（`build_map_info` 按 `vm_pgoff` 换算）。核心模块 的 RX 段 `p_vaddr=0x299E300 / p_offset=0x299D300`，差 0x1000——按 vaddr 注册的探针全部落在目标入口后 0x1000 字节处，首两轮结果作废。任何在 vaddr≠offset 的二进制上注册 uprobes（tracefs、perf、bpftrace 裸地址形态）都必须先做此换算。
+**内核 `uprobe_events` 的裸地址按文件偏移解释**（`build_map_info` 按 `vm_pgoff` 换算）。wrapper.node 的 RX 段 `p_vaddr=0x299E300 / p_offset=0x299D300`，差 0x1000——按 vaddr 注册的探针全部落在目标入口后 0x1000 字节处，首两轮结果作废。任何在 vaddr≠offset 的二进制上注册 uprobes（tracefs、perf、bpftrace 裸地址形态）都必须先做此换算。
 
 ### 2.3 合规性
 
@@ -60,7 +60,7 @@ qq-2738  [001] DNZff  926.174819: napi_send: (0x7fa3a78be4d0)
 
 ## 四、结论
 
-1. **"x64 结构性失效"被推翻**。主程序 libuv 只承担系统调用层；核心模块 的 packet 编解码函数仍看到全部流量。登录页自主流量（心跳/遥测/二维码轮询）以 39 发/39 收完整流经 codec 层。
+1. **"x64 结构性失效"被推翻**。主程序 libuv 只承担系统调用层；wrapper.node 的 packet 编解码函数仍看到全部流量。登录页自主流量（心跳/遥测/二维码轮询）以 39 发/39 收完整流经 codec 层。
 2. **NapCat 式 packet hook 在 Linux x64 3.2.35 上可行**：packet send（0x665CC80）与 packet recv（0x665EA20）就是可用 hook 点。**对 Nekolux 运行时而言 `send_packet` 并不缺**——闭源 addon 的 QHP1 通道早已双向覆盖（见 `docs/PACKET-HOOK-INTEGRATION.md` §〇）；本结论的价值在 NapCat 生态兼容与独立诊断通道。
 3. **napi 层 recv 需要 family indexing**：0x3A49520 这一个 stub 无流量，32 个同构 stub 中活的是哪一个需另行定位（arm64 侧我们已有同族索引方法论；NapCat fork 的 x64 `LINUX_RECV_PATTERN` 用长 dispatch 块区分同族 7 个分发函数）。
 4. 观察窗口内登录页速率约 5-6 包/分钟，符合心跳+遥测预期；正式登录后流量密度会高一个数量级以上，hook 价值不变。
@@ -97,7 +97,7 @@ qq-2738  [001] DNZff  926.174819: napi_send: (0x7fa3a78be4d0)
 | packet send（ELF） | 0x665CC80 | `CCB9900`（=2×RVA）✓ | 39 命中 ✓ |
 | packet recv（ELF） | 0x665EA20 | `CCBD440`（=2×RVA）✓ | 39 命中 ✓ |
 
-Windows PE 侧同步回归：本地 9.9.36-53644 核心模块 上 napi send/recv 解析出 `C3EE2F`/`24A6355`、packet send/recv 表值 `38255F0`/`3828E30`，与 fork 表逐字节一致。
+Windows PE 侧同步回归：本地 9.9.36-53644 wrapper.node 上 napi send/recv 解析出 `C3EE2F`/`24A6355`、packet send/recv 表值 `38255F0`/`3828E30`，与 fork 表逐字节一致。
 
 工程要点：`.eh_frame_hdr` FDE 表解析出 322,547 个函数入口（与 WSL 阶段枚举一致），`requireEhFrameEntry` 约束使 recv 同族分发函数收敛到唯一命中；tracefs 文件偏移语义（§2.2）同时写入了内核探针文档。
 

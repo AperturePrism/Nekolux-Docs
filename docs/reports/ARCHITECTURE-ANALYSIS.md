@@ -10,7 +10,7 @@
 
 | 问题 | 结论 |
 |---|---|
-| 两者能直接合并代码吗？ | **不能。** 底层接入方式根本不同（进程内 NodeIKernel API vs 进程外 协议包 hook），协议层无法共享。 |
+| 两者能直接合并代码吗？ | **不能。** 底层接入方式根本不同（进程内 NodeIKernel API vs 进程外 SSO 封包 hook），协议层无法共享。 |
 | 能做深度融合吗？ | **能，但只能是「重写式融合」**：选一个基座，把另一方的**设计模式与能力清单**移植过去，而不是 merge 仓库。 |
 | 谁更适合当基座？ | **SnowLuma**（理由见 §7）。但如果你最看重「现成插件生态 + 社区」，则 NapCat。 |
 | 最大风险 | 两个项目**都已停止维护**（NapCat 官方删库、SnowLuma 官方 404）。融合产物将**没有上游可跟**，QQ 每次更新都要自己修 hook 偏移。 |
@@ -57,7 +57,7 @@
 | 产物形态 | `napcat.mjs`（依赖外部 node_modules） | `index.mjs` 单文件 + `native/` |
 | 文档站 | `napcat.napneko.icu`（VitePress） | `snowluma.github.io`（VitePress）+ 4 个独立 npm 包 README |
 
-**判读**：SnowLuma 代码量是 NapCat 的近 3 倍，但其中约 40% 在 `protocol`（31,863 行）——那是它自己实现全套 二进制协议 编解码的代价。NapCat 走 NodeIKernel API，同样的功能只需 27,296 行 `napcat-core`。
+**判读**：SnowLuma 代码量是 NapCat 的近 3 倍，但其中约 40% 在 `protocol`（31,863 行）——那是它自己实现全套 OIDB 编解码的代价。NapCat 走 NodeIKernel API，同样的功能只需 27,296 行 `napcat-core`。
 
 ---
 
@@ -72,15 +72,15 @@ QQ.exe 启动
   └─ package.json 的 "main" 被改成 ./loadNapCat.js
        └─ loadNapCat.js  import(NAPCAT_MAIN_PATH)  →  napcat.mjs
             └─ 直接在 QQ 主进程里运行 NapCat
-                 ├─ 拿到 NodeIQQNTWrapperSession（QQ 自己的 核心模块 导出）
+                 ├─ 拿到 NodeIQQNTWrapperSession（QQ 自己的 wrapper.node 导出）
                  ├─ 调用 session.getMsgService() / getGroupService() …（46+35 处调用）
                  └─ 通过 NodeIKernelMsgListener 等监听器接收事件
 ```
 
 **关键点**：NapCat 就是 QQ 主进程的一部分。它用的是 QQ 自己的 JS 对象和方法，不碰网络层。
 
-- 优势：能力最全（QQ 内部有什么就能用什么），实现简单，不需要理解 SSO/二进制协议
-- 劣势：**与 QQ 版本强耦合**。QQ 改一个内部 API 签名就挂。单进程只能跑一个账号。Linux 需要替换 `核心模块`（就是你的 `NapCatLinuxNodeLoader` 干的事）
+- 优势：能力最全（QQ 内部有什么就能用什么），实现简单，不需要理解 SSO/OIDB
+- 劣势：**与 QQ 版本强耦合**。QQ 改一个内部 API 签名就挂。单进程只能跑一个账号。Linux 需要替换 `wrapper.node`（就是你的 `NapCatLinuxNodeLoader` 干的事）
 
 #### SnowLuma —— 进程外（out-of-process hook）
 
@@ -93,13 +93,13 @@ SnowLuma 独立进程启动
                       Windows: \\.\pipe\mojo.<pid>.<suffix>
                       Linux:   /run/user/.../mojo.<pid>.control.sock
                         └─ 管道帧格式：cmdLen | msgLen | bodyLen | cmd | msg | body
-                             └─ SnowLuma 侧自己 encode/decode 协议包（二进制协议）
+                             └─ SnowLuma 侧自己 encode/decode SSO 封包（OIDB）
 ```
 
 **关键点**：SnowLuma 只 hook 两个函数地址，然后**在进程外自己实现整套协议**。
 
 - 优势：与 QQ 版本**弱耦合**（只需函数偏移，见 §4.2），天然支持多账号（一个进程管多个 QQ 实例），Linux 原生支持，崩溃不拖死 QQ
-- 劣势：要实现全部 二进制协议 cmd，代码量巨大（`protocol/src/oidb-services` 117 个文件 / 548KB）；某些 QQ 内部能力（NodeIKernel 才有的）拿不到
+- 劣势：要实现全部 OIDB cmd，代码量巨大（`protocol/src/oidb-services` 117 个文件 / 548KB）；某些 QQ 内部能力（NodeIKernel 才有的）拿不到
 
 ### 3.2 这个差异意味着什么
 
@@ -108,7 +108,7 @@ SnowLuma 独立进程启动
 | | NapCat 路线 | SnowLuma 路线 |
 |---|---|---|
 | 抽象层级 | QQ 的 JS API（高） | SSO 二进制封包（低） |
-| 需要理解 | QQ 内部对象模型 | QQ 协议（二进制协议/Protobuf/Highway） |
+| 需要理解 | QQ 内部对象模型 | QQ 协议（OIDB/Protobuf/Highway） |
 | QQ 升级影响 | **大**（API 变更即挂） | 小（只有 hook 偏移变） |
 | 新功能开发成本 | 低（QQ 有接口就能调） | 高（要逆向协议） |
 | 代码量 | 小 | 大 |
@@ -124,8 +124,8 @@ SnowLuma 独立进程启动
 | 层 | NapCat | SnowLuma | 可复用性 |
 |---|---|---|---|
 | **接入/注入** | `napcat-shell-loader`（DLL + loadNapCat.js）、`napcat-shell` | `bridge`（5,582 行：injector / hook-manager / pipe-watcher / qq-account） | ❌ 互斥 |
-| **原生模块** | `napcat-native`（MoeHoo 协议层拦截、napi2native、ffmpeg、pty、dpapi） | `runtime/native`（snowluma-*.node/.dll/.so、websocket、sqlite、ffmpeg） | ❌ 互斥 |
-| **核心 API 层** | `napcat-core/apis`（4,836 行，13 个 官方客户端*Api 类，包 NodeIKernel） | `core/src/bridge/apis`（9,230 行，19 个区域 Api） | ⚠️ 接口可对齐，实现不可复用 |
+| **原生模块** | `napcat-native`（MoeHoo 封包 hook、napi2native、ffmpeg、pty、dpapi） | `runtime/native`（snowluma-*.node/.dll/.so、websocket、sqlite、ffmpeg） | ❌ 互斥 |
+| **核心 API 层** | `napcat-core/apis`（4,836 行，13 个 NTQQ*Api 类，包 NodeIKernel） | `core/src/bridge/apis`（9,230 行，19 个区域 Api） | ⚠️ 接口可对齐，实现不可复用 |
 | **协议层** | `napcat-core/packet`（transformer 74 文件 + handler）—— **只用于少数 NodeIKernel 拿不到的能力** | `protocol`（31,863 行：oidb-services 117 文件、msg-push、highway、dataline、web） | ⚠️ SnowLuma 的协议实现是资产 |
 | **事件转换** | `napcat-onebot/event` + `listeners` | `onebot/src/event-converter` + `protocol/msg-push/decoders` | ✅ 设计可借鉴 |
 | **OneBot 动作** | `napcat-onebot/action`（214 文件 / 12,174 行，class-per-action + TypeBox + 装饰器） | `onebot/src/actions`（216 action / 468KB，声明式 `defineAction` + `f.*` DSL） | ✅ **这是最有价值的互补点** |
@@ -305,11 +305,11 @@ export const actions = [
 
 **推荐 SnowLuma 当基座。** 理由按权重排序：
 
-1. **架构演进方向正确**：进程外 hook 是 QQ 生态的必然方向（NapCat 自己也在 `napcat-core/packet` 里做了协议层拦截 的尝试，只是没全面切换）。选它等于选未来。
+1. **架构演进方向正确**：进程外 hook 是 QQ 生态的必然方向（NapCat 自己也在 `napcat-core/packet` 里做了封包 hook 的尝试，只是没全面切换）。选它等于选未来。
 2. **迁移量不对称**：从 SnowLuma 补插件系统 ≈ 新增 1 个子系统；从 NapCat 换 hook ≈ 重写整个 core + 214 个 action。**前者是 20%，后者是 90%。**
 3. **多账号是硬需求**：NapCat 架构上做不了（一个 QQ 进程一个 NapCat）。
 4. **代码质量与测试**：509 vs 52 的测试差距，说明 SnowLuma 更适合作为长期演进的底座。
-5. **你的部署仓库都指向 Linux**：`NapCatLinuxNodeLoader`、`NapCat-Docker`、`NapCat-Installer` 全是为 Linux 服务端部署。SnowLuma 原生支持 Linux；NapCat 在 Linux 上要靠替换 `核心模块` 这种脆弱手段。
+5. **你的部署仓库都指向 Linux**：`NapCatLinuxNodeLoader`、`NapCat-Docker`、`NapCat-Installer` 全是为 Linux 服务端部署。SnowLuma 原生支持 Linux；NapCat 在 Linux 上要靠替换 `wrapper.node` 这种脆弱手段。
 
 **反方观点（要诚实说）**：如果你**最看重插件生态和现成用户群**，NapCat 是唯一选择——SnowLuma 从零建插件生态需要时间，而 NapCat 已有插件市场和官方白名单。但考虑到**上游已死**，这个生态也不会再增长。
 
@@ -384,7 +384,7 @@ export const actions = [
 | **QQ 协议逆向** | 🟡 中 | 频道等能力需要逆向 | 优先级降到最低 |
 | **Node 24 硬要求** | 🟢 低 | SnowLuma 要求 Node 24.22.1+ | 发行包内置 node.exe，无影响 |
 
-> **关于「原生二进制无法重建」**：这是整个融合计划的最大不确定性，且**两个项目同样中招**。SnowLuma 的 `packages/runtime/native/` 只有预编译产物，`AGENTS.md` 明确写着它们是「supplied build inputs」；NapCat 的 `napcat-native/` 也只有 `.node` 二进制（`MoeHoo.*` 协议层拦截、`napi2native.*` 注入、`NapCatWinBootHook.dll`），仓库里唯一的 C++ 是 `.github/tests/windows-loader/probe.cpp`（测试用）。两边的原生层都**没有公开源码**。做阶段 0 验证时必须重点确认：现有二进制能否在你当前的 QQ 版本上工作。这是整个计划的**唯一硬门禁**。
+> **关于「原生二进制无法重建」**：这是整个融合计划的最大不确定性，且**两个项目同样中招**。SnowLuma 的 `packages/runtime/native/` 只有预编译产物，`AGENTS.md` 明确写着它们是「supplied build inputs」；NapCat 的 `napcat-native/` 也只有 `.node` 二进制（`MoeHoo.*` 封包 hook、`napi2native.*` 注入、`NapCatWinBootHook.dll`），仓库里唯一的 C++ 是 `.github/tests/windows-loader/probe.cpp`（测试用）。两边的原生层都**没有公开源码**。做阶段 0 验证时必须重点确认：现有二进制能否在你当前的 QQ 版本上工作。这是整个计划的**唯一硬门禁**。
 
 ---
 
@@ -395,7 +395,7 @@ export const actions = [
 | 关注点 | 路径 |
 |---|---|
 | 注入入口 | `packages/napcat-shell-loader/launcher.bat`、`loadNapCat.js`、`qqnt.json` |
-| 协议层拦截 | `packages/napcat-core/packet/handler/client.ts`（MoeHoo）、`external/napi2native.json`（偏移表） |
+| 封包 hook | `packages/napcat-core/packet/handler/client.ts`（MoeHoo）、`external/napi2native.json`（偏移表） |
 | API 层 | `packages/napcat-core/apis/*.ts`（13 个类，4,836 行） |
 | Action 基类 | `packages/napcat-onebot/action/OneBotAction.ts` |
 | Action 注册 | `packages/napcat-onebot/action/auto-register.ts`、`router.ts`（ActionName 枚举） |

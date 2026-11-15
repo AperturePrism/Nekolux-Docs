@@ -1,6 +1,6 @@
 # NapCat 偏移逆向（独立保留）
 
-> 本目录保留 NapCat 原有的「逆向新 核心模块 算出偏移」能力。
+> 本目录保留 NapCat 原有的「逆向新 wrapper.node 算出偏移」能力。
 > 它与 `packages/native-offsets` 的签名方案**并存**，不是替代关系。
 
 ---
@@ -27,17 +27,17 @@
 ### 1.1 环境
 
 ```
-QQ: C:\Program Files\Tencent\QQNT\versions\<ver>\resources\app\核心模块
+QQ: C:\Program Files\Tencent\QQNT\versions\<ver>\resources\app\wrapper.node
 工具: IDA Pro / Ghidra（任一）
 ```
 
 ### 1.2 方法 A：导出符号锚点（推荐，快）
 
-Windows 的 `核心模块` 是 stripped PE，但有 885 个**动态导出符号**：
+Windows 的 `wrapper.node` 是 stripped PE，但有 885 个**动态导出符号**：
 
 ```bash
 # 用 dumpbin（VS 自带）或 Python pefile 列出导出
-dumpbin /exports 核心模块 | grep -i "MSF"
+dumpbin /exports wrapper.node | grep -i "MSF"
 ```
 
 已知有用的符号：
@@ -78,7 +78,7 @@ PE 的 `.pdata` 节（异常处理表）记录了**所有函数的起止地址**
 
 ### 1.4 方法 C：完整逆向（最后手段）
 
-1. IDA 载入 `核心模块`（体积极大，全量分析要几小时）
+1. IDA 载入 `wrapper.node`（体积极大，全量分析要几小时）
 2. 找 `MSF` 相关的字符串交叉引用
 3. 在 `sendPacket` / 接收函数的入口下断点
 4. 确认参数签名（send 通常是 `(this, unique_ptr<MSFRequest>)`）
@@ -108,7 +108,7 @@ file_offset = 节.PointerToRawData + (RVA - 节.VirtualAddress)
 ### 2.1 环境
 
 ```
-QQ: /opt/QQ/resources/app/核心模块
+QQ: /opt/QQ/resources/app/wrapper.node
 当前实测版本: 3.2.35-54395（152,431,496 B，ELF64 x64，stripped）
 ```
 
@@ -117,7 +117,7 @@ QQ: /opt/QQ/resources/app/核心模块
 Linux 版有 **885 个动态符号**，包括完整的 MSF 命名空间：
 
 ```bash
-nm -D /opt/QQ/resources/app/核心模块 | grep "MSF"
+nm -D /opt/QQ/resources/app/wrapper.node | grep "MSF"
 ```
 
 ```
@@ -144,13 +144,13 @@ nm -D /opt/QQ/resources/app/核心模块 | grep "MSF"
 
 ```bash
 # 1. 找 sendPacket 的 VA
-nm -D 核心模块 | grep "MSFSDK10sendPacket"
+nm -D wrapper.node | grep "MSFSDK10sendPacket"
 # → 0x670dd20
 
 # 2. 转成 file offset
 #    ELF: file_offset = sh_offset + (VA - sh_addr)
 #    本版本 .text: sh_addr=0x?, sh_offset=0x?
-readelf -S 核心模块 | grep -A1 "\.text"
+readelf -S wrapper.node | grep -A1 "\.text"
 
 # 3. 在 sendPacket 附近（±1MB）搜索函数序言
 # 4. 用 NapCat 已知的 3.2.34 偏移做交叉验证（如果拿得到旧版本二进制）
@@ -173,7 +173,7 @@ readelf -S 核心模块 | grep -A1 "\.text"
 
 ## 三、macOS（Mach-O）
 
-未涉及。`核心模块` 应该是 Mach-O 格式，`nm -gU` 可以列符号。
+未涉及。`wrapper.node` 应该是 Mach-O 格式，`nm -gU` 可以列符号。
 
 ---
 

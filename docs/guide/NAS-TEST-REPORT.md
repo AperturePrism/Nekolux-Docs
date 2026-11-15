@@ -82,10 +82,10 @@ async function worker() {
 ```
 消息ID不存在      100   message not found
 不存在的文件      100   ENOENT: no such file or directory, realpath '/tmp/no-such-file.txt'
-超大禁言时长      100   二进制协议 error 120101203 on 0x1253_1:
+超大禁言时长      100   OIDB error 120101203 on 0x1253_1:
 ```
 
-`二进制协议 error` 带上了 cmd 和错误码，排障友好。
+`OIDB error` 带上了 cmd 和错误码，排障友好。
 
 ### 3.3 正常通过
 
@@ -174,7 +174,7 @@ export async function plugin_onmessage(ctx, event) {
 | 方案 | 问题 |
 |---|---|
 | 暴露 `bridge` / `oneBot` 实例 | 插件绕过 OneBot 抽象，直接操作协议 |
-| 暴露原始协议包发送 | 插件能构造任意 二进制协议，安全边界消失 |
+| 暴露原始封包发送 | 插件能构造任意 OIDB，安全边界消失 |
 | **只暴露 `callAction`** | 复用 214 个 action，能力完整且边界清晰 |
 
 加了 3 个测试（`tests/runtime.test.ts`），覆盖：转发、无实现时报错、失败传播。

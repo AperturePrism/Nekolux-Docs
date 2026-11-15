@@ -56,8 +56,8 @@
 | QQ 崩溃影响 | 机器人一起挂 | 机器人还在，可自动重注入 |
 | 多账号 | 一进程一账号 | ✅ 架构级支持（每 PID 独立会话） |
 | 插件生态起点 | 直接继承 NapCat 插件 | 重新设计（沙箱 + 市场 + 热重载） |
-| Linux | 需替换 核心模块 | ✅ 原生 ptrace，不改任何文件 |
-| 协议层 | 调 QQ 内部 API（跟版本走） | 自实现 二进制协议包（只需函数地址） |
+| Linux | 需替换 wrapper.node | ✅ 原生 ptrace，不改任何文件 |
+| 协议层 | 调 QQ 内部 API（跟版本走） | 自实现 OIDB/SSO 封包（只需函数地址） |
 | 部署形态 | 便携目录 / V8 通道 | ✅ Docker 镜像一键跑 |
 
 **一句话**：进程内贴着 QQ 的心脏走，省一层 IPC；进程外隔着护栏走，
@@ -105,7 +105,7 @@ docker run -d --name nekolux \
 pnpm install
 pnpm test          # 125 个单元测试，无 QQ 环境可跑
 
-pnpm resolve-offsets <核心模块>   # 签名扫描偏移
+pnpm resolve-offsets <wrapper.node>   # 签名扫描偏移
 ```
 
 ## 🧩 插件
@@ -185,14 +185,14 @@ Docker 容器（或裸机）
 
 ### 平台支持
 
-| 平台 | 协议层拦截（签名） | OneBot 主路径 |
+| 平台 | 封包 hook（签名） | OneBot 主路径 |
 |---|---|---|
 | Windows QQ 9.9.36 | ✅ send/recv 唯一命中 | ✅ |
 | Linux QQ 3.2.28 | —（镜像内置） | ✅（NAS 实测） |
 | Linux QQ 3.2.35+ | ❌ 网络层移入主程序 libuv | ✅（VPS 实测） |
 
-> Linux 3.2.35 的结论：QQ 把网络层搬进了主程序的 libuv，`核心模块` 只剩
-> 协议编解码 —— 协议层拦截 在该版本结构性失效，但 OneBot 主路径（消息、WebUI、登录）
+> Linux 3.2.35 的结论：QQ 把网络层搬进了主程序的 libuv，`wrapper.node` 只剩
+> 协议编解码 —— 封包 hook 在该版本结构性失效，但 OneBot 主路径（消息、WebUI、登录）
 > 完全可用。详见 [docs/LINUX-HOOK-INVESTIGATION.md](/protocol/LINUX-HOOK-INVESTIGATION)。
 
 ## 📚 文档
@@ -241,6 +241,6 @@ Docker 容器（或裸机）
 | **上游已死** | 🔴 | QQ 更新后无人修，全部靠自己（签名扫描是为了让「自己扛」成本更低） |
 | **闭源 native** | 🔴 | hook 的 .so/.node 是预编译产物，失效时需重新逆向 |
 | **运行时不可分发** | 🟠 | 受 SnowLuma 原许可约束，见上文授权说明 |
-| **Linux 协议层拦截** | 🟢→🟡 | 运行时自身的裸包收发**不缺**——闭源 addon 经 QHP1 双向覆盖（`send_packet` action 已上线，NAS 实测）；x64 codec 层存活与四组签名（[决定性实验](/reports/X64-CODEC-ALIVE-EXPERIMENT)）服务于 NapCat 兼容与独立诊断通道（`native/packet-hook/`，零账号验证过的保险工具） |
+| **Linux 封包 hook** | 🟢→🟡 | 运行时自身的裸包收发**不缺**——闭源 addon 经 QHP1 双向覆盖（`send_packet` action 已上线，NAS 实测）；x64 codec 层存活与四组签名（[决定性实验](/reports/X64-CODEC-ALIVE-EXPERIMENT)）服务于 NapCat 兼容与独立诊断通道（`native/packet-hook/`，零账号验证过的保险工具） |
 | **9.9.37 listener 改名** | 🟡 | 6 个内核事件回调在 9.9.37/3.2.35 改名，旧名 hook 会**静默丢失事件**；注入后必须做事件流自检，不能以"无报错"当作成功 |
 | **签名单版本实测** | 🟡 | 跨版本稳定性未验证 |

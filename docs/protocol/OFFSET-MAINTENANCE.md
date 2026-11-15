@@ -2,7 +2,7 @@
 
 > 适用：`unified/packages/native-offsets`
 > 建立日期：2026-11-13
-> 目的：让 NapCat 的协议层拦截 不再依赖「每个 QQ 版本人工加一行偏移」
+> 目的：让 NapCat 的封包 hook 不再依赖「每个 QQ 版本人工加一行偏移」
 
 ---
 
@@ -32,7 +32,7 @@ NapCat 的 `packages/napcat-core/external/napi2native.json` 长这样：
 
 ### 1.1 NapCat 的偏移是 RVA，不是 file offset
 
-Windows QQ `9.9.36-53644`，`核心模块`（117,866,024 B，PE x64）：
+Windows QQ `9.9.36-53644`，`wrapper.node`（117,866,024 B，PE x64）：
 
 | hook | NapCat 表值 | 按 file offset 解释 | 按 RVA 解释（正确） |
 |---|---|---|---|
@@ -74,7 +74,7 @@ cd unified
 pnpm install
 
 # 解析（只读）
-pnpm resolve-offsets "C:\Program Files\Tencent\QQNT\versions\9.9.36-53644\resources\app\核心模块"
+pnpm resolve-offsets "C:\Program Files\Tencent\QQNT\versions\9.9.36-53644\resources\app\wrapper.node"
 
 # 机器可读
 pnpm resolve-offsets <path> --json
@@ -83,7 +83,7 @@ pnpm resolve-offsets <path> --json
 输出：
 
 ```
-file   : 核心模块
+file   : wrapper.node
 size   : 117,866,024
 sha256 : 0d8b94448f4dafe7337b88d568b004224c37fcbe2bd1142c1af7624fbd534c
 format : pe  arch=x64  imageBase=0x180000000
@@ -184,8 +184,8 @@ const result = resolve(path, data, NAPCAT_HOOK_SIGNATURES, {
 拿**旧版本**命中点附近的一段长字节（±256 B）去**新版本**里搜：
 
 ```python
-old = open("old_核心模块", "rb").read()
-new = open("new_核心模块", "rb").read()
+old = open("old_wrapper.node", "rb").read()
+new = open("new_wrapper.node", "rb").read()
 off = 0xC3E22F                    # 旧版本已知 file offset
 sig = old[off - 256 : off + 256]  # 512 字节上下文
 idx = new.find(sig)
@@ -203,10 +203,10 @@ NapCat 的 hook 目标是 MSF 网络层：
 - `MSF::MSFSDK::sendPacket` —— 导出符号，`nm -D` 能看到（Linux 版）
 - 接收方向函数没有导出符号，需要靠调用关系定位
 
-**Linux 技巧**：`核心模块` 有 885 个导出符号，可以先用 `MSFSDK::sendPacket`
+**Linux 技巧**：`wrapper.node` 有 885 个导出符号，可以先用 `MSFSDK::sendPacket`
 附近的符号作为锚点，再找调用它的内部函数。
 
-**Windows 技巧**：`核心模块` 是 stripped PE，但有 `.pdata` 节（异常处理表），
+**Windows 技巧**：`wrapper.node` 是 stripped PE，但有 `.pdata` 节（异常处理表），
 里面记录了**所有函数的起止地址**——可以用来枚举函数边界，大幅缩小搜索范围。
 
 ### 5.4 兜底：手工维护静态表
@@ -218,7 +218,7 @@ NapCat 的 hook 目标是 MSF 网络层：
 
 ## 6. 平台差异
 
-| 平台 | 核心模块 格式 | 现状 |
+| 平台 | wrapper.node 格式 | 现状 |
 |---|---|---|
 | Windows | PE x64 | ✅ 已验证（9.9.36-53644，napi send/recv + packet send/recv 各唯一命中，与 fork 表逐字节一致） |
 | Linux | ELF x64 | ✅ **跨版本已验证**：3.2.28-48517 与 3.2.35-54395 上 napi send + packet send/recv 三组签名均唯一命中，与 fork 表值一致（详见下表） |
@@ -271,9 +271,9 @@ NapCat 的 hook 目标是 MSF 网络层：
 
 ```bash
 # Windows PE（117MB）
-UNIFIED_WRAPPER_NODE="C:\Program Files\Tencent\QQNT\versions\<版本>\resources\app\核心模块"
+UNIFIED_WRAPPER_NODE="C:\Program Files\Tencent\QQNT\versions\<版本>\resources\app\wrapper.node"
 # Linux ELF x64（152MB，3.2.35-54395）
-UNIFIED_LINUX_WRAPPER_NODE="<本机路径>\核心模块"
+UNIFIED_LINUX_WRAPPER_NODE="<本机路径>\wrapper.node"
 ```
 
 ---
@@ -325,7 +325,7 @@ LLQQNT 那份 `OFFSET-RESOLUTION.md` 的 §10「sig 失效时怎么重新定特�
 ## 10. 已知限制
 
 1. **只有单版本实测**。签名在 9.9.36-53644 唯一命中，但没有第二个版本的
-   `核心模块` 做跨版本验证。真正证明「跨版本稳定」需要拿到 9.9.35 或
+   `wrapper.node` 做跨版本验证。真正证明「跨版本稳定」需要拿到 9.9.35 或
    9.9.37 的二进制跑一遍。
 2. **Linux 签名未采集**。当前只有 Windows。
 3. **`requireEntry` 字段未实现**。签名库里有这个字段，但 `resolver.ts`

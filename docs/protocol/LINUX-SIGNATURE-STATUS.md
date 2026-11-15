@@ -4,7 +4,7 @@
 > 那个结论**已被推翻**，原因有二：
 >
 > 1. 「卡在登录」这个阻塞点不存在：**零账号 uprobe 实验**用登录页自主流量就验证了 codec 层存活
-> 2. 「Linux 3.2.35 协议层拦截 架构失效」也是误读（见 [LINUX-HOOK-INVESTIGATION](/protocol/LINUX-HOOK-INVESTIGATION) §十）
+> 2. 「Linux 3.2.35 封包 hook 架构失效」也是误读（见 [LINUX-HOOK-INVESTIGATION](/protocol/LINUX-HOOK-INVESTIGATION) §十）
 >
 > 当前状态：**Linux 签名已整合、跨版本验证通过、生产环境在用。**
 
@@ -43,9 +43,9 @@
 不需要登录 QQ。登录页本身就在发心跳 / o3 遥测 / 二维码轮询，用 `tracefs` 挂被动探针即可：
 
 ```bash
-# 注意：MEMADDR 是**文件偏移**，不是 vaddr（核心模块 RX 段差 0x1000）
-echo 'p:uprobes/codec_send /path/核心模块:0x000000000665bc80' >> /sys/kernel/tracing/uprobe_events
-echo 'p:uprobes/codec_recv /path/核心模块:0x000000000665da20' >> /sys/kernel/tracing/uprobe_events
+# 注意：MEMADDR 是**文件偏移**，不是 vaddr（wrapper.node RX 段差 0x1000）
+echo 'p:uprobes/codec_send /path/wrapper.node:0x000000000665bc80' >> /sys/kernel/tracing/uprobe_events
+echo 'p:uprobes/codec_recv /path/wrapper.node:0x000000000665da20' >> /sys/kernel/tracing/uprobe_events
 ```
 
 结果：7 分钟窗口内 send/recv 各 39 次，**严格 1:1 对称**（请求/响应配对）。

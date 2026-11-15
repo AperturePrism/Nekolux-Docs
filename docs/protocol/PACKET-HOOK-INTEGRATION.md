@@ -28,7 +28,7 @@
 | 选项 | 结论 |
 |---|---|
 | 复用闭源 loader（`loadModuleManualAsync`） | ❌ 实测拒绝非白名单模块（`COMPONENT_LOAD_FAILED`）——loader 按导出符号识别模块（`snowluma_linux_hook_*` 6 个符号）；模仿符号会与真 hook 模块冲突 |
-| 自研 进程附加器（远程 dlopen） | ✅ **采用**。`PTRACE_ATTACH` → 单步执行 libc 内 `syscall;ret` gadget 完成远程 mmap → 远程调用 `dlopen(path, RTLD_NOW)` → int3 返回桩捕获 → 恢复寄存器 DETACH。glibc 原生完成重定位/TLS/init_array，无需手写 manual-map |
+| 自研 ptrace 注入器（远程 dlopen） | ✅ **采用**。`PTRACE_ATTACH` → 单步执行 libc 内 `syscall;ret` gadget 完成远程 mmap → 远程调用 `dlopen(path, RTLD_NOW)` → int3 返回桩捕获 → 恢复寄存器 DETACH。glibc 原生完成重定位/TLS/init_array，无需手写 manual-map |
 | LD_PRELOAD（部署层） | 备选（需控制 QQ 启动），当前不需要 |
 
 组件（全部原创代码，PolyForm NC）：
@@ -40,7 +40,7 @@
 
 ## 二、已验证事实（全部零账号，QQ 全程存活）
 
-1. **注入链路**：QQ 主进程（映射 核心模块 者）注入成功，dlopen 返回非空，构造函数执行，worker 线程启动。失败路径（错误 gadget/缺模块）QQ 无伤。
+1. **注入链路**：QQ 主进程（映射 wrapper.node 者）注入成功，dlopen 返回非空，构造函数执行，worker 线程启动。失败路径（错误 gadget/缺模块）QQ 无伤。
 2. **detour**：入口 14 字节 `jmp [rip+0]` + 8 字节绝对地址；跳板 = 原 17 字节前缀 + 跳回 entry+17（前缀均为 push/sub，无 RIP 相对引用，30 秒观察窗内 QQ 稳定收发）。
 3. **收发监听**：30 秒 32 次捕获（登录页心跳节奏），文件 dump + UNIX socket 双通道。
 4. **socket 协议**：python 客户端收 25 个 JSON 行事件（13 send / 12 recv），`{"kind":"send|recv","t","ns","tid","args":[6 个十六进制],"l1":[各参数一级内存],"l2":[二级字段 hex]}`。
@@ -79,7 +79,7 @@
 gcc -O2 -o nekolux-packet-inject injector.c
 gcc -shared -fPIC -O1 -o nekolux-packet-hook.so packet-hook.c -lpthread
 # conf（可选）：mode=2 sock=/tmp/nekolux-packet.sock dump=/tmp/nekolux-packet-dump.log
-./nekolux-packet-inject <映射 核心模块 的 pid> ./nekolux-packet-hook.so
+./nekolux-packet-inject <映射 wrapper.node 的 pid> ./nekolux-packet-hook.so
 # 客户端连 /tmp/nekolux-packet.sock（SOCK_SEQPACKET）逐行收 JSON
 ```
 

@@ -12,7 +12,7 @@
 | 扩展 | 作用 |
 |---|---|
 | `@unified/plugin` | 插件系统（加载、事件分发、action 回退） |
-| `@unified/native-offsets` | 签名扫描（Windows 协议层拦截 用） |
+| `@unified/native-offsets` | 签名扫描（Windows 封包 hook 用） |
 
 ---
 

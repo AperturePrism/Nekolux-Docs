@@ -1,6 +1,6 @@
 # Linux 部署（保姆级）
 
-> 适用：Debian / Ubuntu / Arch 等主流发行版，已装或准备装 官方客户端（3.2.x）
+> 适用：Debian / Ubuntu / Arch 等主流发行版，已装或准备装 QQ NT（3.2.x）
 > 目标：从零到「QQ 已注入、OneBot 接口可用」
 > 预计 25 分钟
 
@@ -8,7 +8,7 @@
 
 ## 一、先选部署方式
 
-Linux 上强烈建议 **Docker**。原因：官方客户端 依赖一大堆 Qt/GTK/X11 库，裸机部署要手工装几十个包；
+Linux 上强烈建议 **Docker**。原因：QQ NT 依赖一大堆 Qt/GTK/X11 库，裸机部署要手工装几十个包；
 Docker 镜像里已经配好了 Xvfb + VNC + QQ，一条命令起。
 
 | 方式 | 适合 |
@@ -216,7 +216,7 @@ sudo pacman -S --needed gtk3 nss alsa-lib at-spi2-core \
   libxcomposite libxdamage libxrandr libxkbcommon xvfb
 ```
 
-### 3.2 安装 官方客户端
+### 3.2 安装 QQ NT
 
 从 AUR 或官方 deb 包安装。手动解包也可以：
 

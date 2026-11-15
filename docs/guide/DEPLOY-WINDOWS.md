@@ -1,6 +1,6 @@
 # Windows 部署（保姆级）
 
-> 适用：Windows 10 / 11，已安装 官方客户端（9.9.x）
+> 适用：Windows 10 / 11，已安装 QQ NT（9.9.x）
 > 目标：从零到「QQ 已注入、OneBot 接口可用」
 > 预计 15 分钟
 
@@ -236,7 +236,7 @@ Get-NetTCPConnection -LocalPort 5099,3000,3001 | Select-Object LocalPort,OwningP
 
 ### 7.6 QQ 更新后失效
 
-QQ 大版本更新可能改变 拦截点。Nekolux 用签名扫描而非硬编码偏移，**小版本更新通常不受影响**；
+QQ 大版本更新可能改变 hook 点。Nekolux 用签名扫描而非硬编码偏移，**小版本更新通常不受影响**；
 若真的失效，看 [偏移维护](/protocol/OFFSET-MAINTENANCE)。
 
 ---
