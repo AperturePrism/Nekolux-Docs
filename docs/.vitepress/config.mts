@@ -27,7 +27,7 @@ export default defineConfig({
         siteTitle: 'Nekolux',
 
         nav: [
-            { text: '指南', link: '/guide/overview', activeMatch: '/guide/' },
+            { text: '指南', link: '/guide/QUICKSTART', activeMatch: '/guide/' },
             { text: '插件开发', link: '/plugins/PLUGIN-SYSTEM', activeMatch: '/plugins/' },
             { text: '协议层', link: '/protocol/LINUX-HOOK-INVESTIGATION', activeMatch: '/protocol/' },
             { text: '报告', link: '/reports/X64-CODEC-ALIVE-EXPERIMENT', activeMatch: '/reports/' },
@@ -47,8 +47,16 @@ export default defineConfig({
                     text: '开始使用',
                     items: [
                         { text: '项目总览', link: '/guide/overview' },
-                        { text: '运行时装配', link: '/guide/RUNTIME-ASSEMBLY' },
+                        { text: '快速开始', link: '/guide/QUICKSTART' },
+                    ],
+                },
+                {
+                    text: '部署',
+                    items: [
+                        { text: 'Windows 部署', link: '/guide/DEPLOY-WINDOWS' },
+                        { text: 'Linux 部署', link: '/guide/DEPLOY-LINUX' },
                         { text: 'NAS 部署', link: '/guide/NAS-DEPLOYMENT' },
+                        { text: '运行时装配', link: '/guide/RUNTIME-ASSEMBLY' },
                         { text: '多账号', link: '/guide/MULTI-ACCOUNT' },
                     ],
                 },

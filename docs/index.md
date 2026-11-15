@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 快速开始
-      link: /guide/overview
+      link: /guide/QUICKSTART
     - theme: alt
       text: 插件开发
       link: /plugins/PLUGIN-SYSTEM
@@ -69,4 +69,4 @@ docker run -d --name nekolux \
 
 打开 `http://<host>:5099`，VNC 连 `:5902` 扫码登录，OneBot 在 `:3000` 就绪。
 
-详见 [NAS 部署](/guide/NAS-DEPLOYMENT)。
+详见 [快速开始](/guide/QUICKSTART) · [Windows 部署](/guide/DEPLOY-WINDOWS) · [Linux 部署](/guide/DEPLOY-LINUX)。
