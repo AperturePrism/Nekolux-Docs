@@ -3,7 +3,7 @@
 > 调查日期：2026-11-13
 > 环境：阿里云 VPS（Debian 12，x86_64，2核2G）· QQ Linux 3.2.35-54395
 > 结论：~~Linux 3.2.35 上 NapCat 的封包 hook 架构已失效~~
-> **【2026-11-15 修正】封包 hook 架构未失效——本文把「系统调用位置」误读成了「codec 不参与」。修正见 §十 与 [reports/X64-CODEC-ALIVE-EXPERIMENT.md](reports/X64-CODEC-ALIVE-EXPERIMENT.md)**
+> **【2026-11-15 修正】封包 hook 架构未失效——本文把「系统调用位置」误读成了「codec 不参与」。修正见 §十 与 [reports/X64-CODEC-ALIVE-EXPERIMENT.md](/reports/X64-CODEC-ALIVE-EXPERIMENT)**
 
 ---
 

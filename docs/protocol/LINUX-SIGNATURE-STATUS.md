@@ -6,7 +6,7 @@
 > 后续在真实 Linux（VPS）上完成了完整调查，结论是：**QQ 3.2.35 把网络层搬到了主程序的 libuv，
 > `wrapper.node` 不再参与网络 I/O，因此 NapCat 的封包 hook 架构在 Linux 3.2.35 上已失效。**
 >
-> 请直接阅读 [`LINUX-HOOK-INVESTIGATION.md`](LINUX-HOOK-INVESTIGATION.md)。
+> 请直接阅读 [`LINUX-HOOK-INVESTIGATION.md`](/protocol/LINUX-HOOK-INVESTIGATION)。
 >
 > 本文档保留的是 WSL 阶段的调查过程，其中的「签名采集受阻」判断在当时是合理的，
 > 但根本原因不是「语义不明确」，而是**架构变更**。

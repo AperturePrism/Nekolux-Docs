@@ -248,7 +248,7 @@ Test Files  3 passed (3)
 
 测试：新增 5 个（`plugin-action-fallback.test.ts`）+ 6 个桥接测试。
 
-**关键设计决策**（详见 [`PLUGIN-SYSTEM.md`](PLUGIN-SYSTEM.md)）：
+**关键设计决策**（详见 [`PLUGIN-SYSTEM.md`](/plugins/PLUGIN-SYSTEM)）：
 
 - **不照抄 NapCat**：`ctx.core`（NodeIKernel session）在 SnowLuma 里不存在，插件只能注册 action
 - **白名单默认空**：插件能注册任意 action，默认放行等于默认信任任意代码
@@ -266,7 +266,7 @@ NapCat 的插件系统是最有价值的独有资产。移植要点：
 
 ### 阶段 3：Linux 签名采集（已调查，结论：架构变更，不再推进）
 
-完整调查见 [`LINUX-HOOK-INVESTIGATION.md`](LINUX-HOOK-INVESTIGATION.md)。
+完整调查见 [`LINUX-HOOK-INVESTIGATION.md`](/protocol/LINUX-HOOK-INVESTIGATION)。
 
 **结论**：QQ Linux 3.2.35 把网络层搬到了主程序的 libuv，`wrapper.node` 不再参与网络 I/O。
 NapCat 的封包 hook 架构在 Linux 3.2.35 上已失效。

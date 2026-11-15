@@ -8,7 +8,7 @@
 
 *上游在，学上游；上游没了，自己扛。*
 
-[![License](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-orange)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-PolyForm_NC_1.0.0-orange)](https://github.com/AperturePrism/Nekolux/blob/main/LICENSE.md)
 [![OneBot](https://img.shields.io/badge/OneBot-v11-black)](https://github.com/botuniverse/onebot-11)
 [![QQ](https://img.shields.io/badge/QQ-Win_9.9.36·Linux_3.2.28-12B7F5?logo=tencentqq&logoColor=white)](https://im.qq.com)
 [![Tests](https://img.shields.io/badge/tests-125_passing-brightgreen)](#-实测与验证)
@@ -96,7 +96,7 @@ docker run -d --name nekolux \
 # 3️⃣ VNC 连 :5902 扫码 → OneBot 起在 :3000 (HTTP) / :3001 (WS)，WebUI 在 :5099
 ```
 
-详见 [`docker/README.md`](docker/README.md)。
+详见 [`docker/README.md`](https://github.com/AperturePrism/Nekolux/tree/main/docker)。
 
 ### 源码开发
 
@@ -132,8 +132,8 @@ export function plugin_init(ctx) {
 - **热重载**：绕过 ESM 缓存，改完即刷
 - **市场**：本地列表 + 远端索引一键安装（sha256 校验 / 大小限制 / 失败清理）
 
-示例插件：[`examples/plugins/keyword-reply/`](examples/plugins/keyword-reply/)（关键词自动回复）
-· 完整文档：[`docs/PLUGIN-SYSTEM.md`](docs/PLUGIN-SYSTEM.md)
+示例插件：[`examples/plugins/keyword-reply/`](https://github.com/AperturePrism/Nekolux/tree/main/examples/plugins/keyword-reply)（关键词自动回复）
+· 完整文档：[`docs/PLUGIN-SYSTEM.md`](/plugins/PLUGIN-SYSTEM)
 
 ## 🗂️ 仓库结构
 
@@ -175,12 +175,12 @@ Docker 容器（或裸机）
 
 | 验证项 | 结果 | 报告 |
 |---|---|---|
-| Windows 阶段 0（注入 / 管道 / QHP1 握手） | ✅ | [docs/reports/PHASE0-VERIFICATION.md](docs/reports/PHASE0-VERIFICATION.md) |
-| Linux 阶段 0（WSL2 + VPS 实机） | ✅ | [docs/reports/PHASE0-LINUX-VERIFICATION.md](docs/reports/PHASE0-LINUX-VERIFICATION.md) |
-| 签名扫描 vs NapCat 静态偏移表 | ✅ RVA 精确一致 | [docs/OFFSET-MAINTENANCE.md](docs/OFFSET-MAINTENANCE.md) |
-| NAS Docker 双 QQ 并存注入 | ✅ | [docs/NAS-DEPLOYMENT.md](docs/NAS-DEPLOYMENT.md) |
-| 压力（并发 20）/ 边界（撤回 / 戳一戳 / 长图）/ 插件 e2e | ✅ | [docs/NAS-TEST-REPORT.md](docs/NAS-TEST-REPORT.md) |
-| 多账号（双 QQ 同时注入、独立端口） | ✅ 架构验证 | [docs/MULTI-ACCOUNT.md](docs/MULTI-ACCOUNT.md) |
+| Windows 阶段 0（注入 / 管道 / QHP1 握手） | ✅ | [docs/reports/PHASE0-VERIFICATION.md](/reports/PHASE0-VERIFICATION) |
+| Linux 阶段 0（WSL2 + VPS 实机） | ✅ | [docs/reports/PHASE0-LINUX-VERIFICATION.md](/reports/PHASE0-LINUX-VERIFICATION) |
+| 签名扫描 vs NapCat 静态偏移表 | ✅ RVA 精确一致 | [docs/OFFSET-MAINTENANCE.md](/protocol/OFFSET-MAINTENANCE) |
+| NAS Docker 双 QQ 并存注入 | ✅ | [docs/NAS-DEPLOYMENT.md](/guide/NAS-DEPLOYMENT) |
+| 压力（并发 20）/ 边界（撤回 / 戳一戳 / 长图）/ 插件 e2e | ✅ | [docs/NAS-TEST-REPORT.md](/guide/NAS-TEST-REPORT) |
+| 多账号（双 QQ 同时注入、独立端口） | ✅ 架构验证 | [docs/MULTI-ACCOUNT.md](/guide/MULTI-ACCOUNT) |
 | 单元测试 | ✅ 125 passing | `pnpm test` |
 
 ### 平台支持
@@ -193,24 +193,24 @@ Docker 容器（或裸机）
 
 > Linux 3.2.35 的结论：QQ 把网络层搬进了主程序的 libuv，`wrapper.node` 只剩
 > 协议编解码 —— 封包 hook 在该版本结构性失效，但 OneBot 主路径（消息、WebUI、登录）
-> 完全可用。详见 [docs/LINUX-HOOK-INVESTIGATION.md](docs/LINUX-HOOK-INVESTIGATION.md)。
+> 完全可用。详见 [docs/LINUX-HOOK-INVESTIGATION.md](/protocol/LINUX-HOOK-INVESTIGATION)。
 
 ## 📚 文档
 
 | 文档 | 内容 |
 |---|---|
-| 🏗️ [MERGE-PLAN](docs/MERGE-PLAN.md) | 合并方案：为什么选进程外做基座 |
-| 🧩 [PLUGIN-SYSTEM](docs/PLUGIN-SYSTEM.md) | 插件系统全文档（16 节：契约 / 沙箱 / 市场 / 热重载） |
-| 🔬 [OFFSET-MAINTENANCE](docs/OFFSET-MAINTENANCE.md) | 签名采集 → 交叉验证 → 落地全流程 |
-| 🐧 [LINUX-HOOK-INVESTIGATION](docs/LINUX-HOOK-INVESTIGATION.md) | Linux 3.2.35 网络层迁移调查 |
-| 🐳 [docker/README](docker/README.md) | 部署 / 登录 / 端口 / ptrace_scope 排坑 |
-| 📊 [RUNTIME-ASSEMBLY](docs/RUNTIME-ASSEMBLY.md) | bootstrap 装配层设计 |
-| 👥 [MULTI-ACCOUNT](docs/MULTI-ACCOUNT.md) | 多账号架构 + 双容器方案 |
-| 📜 [reports/](docs/reports/) | 架构分析 + 两轮阶段 0 验证原始报告 |
+| 🏗️ [MERGE-PLAN](/guide/MERGE-PLAN) | 合并方案：为什么选进程外做基座 |
+| 🧩 [PLUGIN-SYSTEM](/plugins/PLUGIN-SYSTEM) | 插件系统全文档（16 节：契约 / 沙箱 / 市场 / 热重载） |
+| 🔬 [OFFSET-MAINTENANCE](/protocol/OFFSET-MAINTENANCE) | 签名采集 → 交叉验证 → 落地全流程 |
+| 🐧 [LINUX-HOOK-INVESTIGATION](/protocol/LINUX-HOOK-INVESTIGATION) | Linux 3.2.35 网络层迁移调查 |
+| 🐳 [docker/README](https://github.com/AperturePrism/Nekolux/tree/main/docker) | 部署 / 登录 / 端口 / ptrace_scope 排坑 |
+| 📊 [RUNTIME-ASSEMBLY](/guide/RUNTIME-ASSEMBLY) | bootstrap 装配层设计 |
+| 👥 [MULTI-ACCOUNT](/guide/MULTI-ACCOUNT) | 多账号架构 + 双容器方案 |
+| 📜 [reports/](/reports/X64-CODEC-ALIVE-EXPERIMENT) | 架构分析 + 两轮阶段 0 验证原始报告 |
 
 ## 🔐 授权说明
 
-> **License：PolyForm Noncommercial 1.0.0（详见 [LICENSE.md](LICENSE.md)）**
+> **License：PolyForm Noncommercial 1.0.0（详见 [LICENSE.md](https://github.com/AperturePrism/Nekolux/blob/main/LICENSE.md)）**
 
 授权分两部分，边界说清楚：
 
@@ -241,6 +241,6 @@ Docker 容器（或裸机）
 | **上游已死** | 🔴 | QQ 更新后无人修，全部靠自己（签名扫描是为了让「自己扛」成本更低） |
 | **闭源 native** | 🔴 | hook 的 .so/.node 是预编译产物，失效时需重新逆向 |
 | **运行时不可分发** | 🟠 | 受 SnowLuma 原许可约束，见上文授权说明 |
-| **Linux 封包 hook** | 🟢→🟡 | 运行时自身的裸包收发**不缺**——闭源 addon 经 QHP1 双向覆盖（`send_packet` action 已上线，NAS 实测）；x64 codec 层存活与四组签名（[决定性实验](docs/reports/X64-CODEC-ALIVE-EXPERIMENT.md)）服务于 NapCat 兼容与独立诊断通道（`native/packet-hook/`，零账号验证过的保险工具） |
+| **Linux 封包 hook** | 🟢→🟡 | 运行时自身的裸包收发**不缺**——闭源 addon 经 QHP1 双向覆盖（`send_packet` action 已上线，NAS 实测）；x64 codec 层存活与四组签名（[决定性实验](/reports/X64-CODEC-ALIVE-EXPERIMENT)）服务于 NapCat 兼容与独立诊断通道（`native/packet-hook/`，零账号验证过的保险工具） |
 | **9.9.37 listener 改名** | 🟡 | 6 个内核事件回调在 9.9.37/3.2.35 改名，旧名 hook 会**静默丢失事件**；注入后必须做事件流自检，不能以"无报错"当作成功 |
 | **签名单版本实测** | 🟡 | 跨版本稳定性未验证 |
