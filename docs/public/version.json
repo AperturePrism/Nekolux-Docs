@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "releasedAt": "2026-11-16T00:00:00.000Z",
+  "notes": "首个公开版本：插件系统（action 注册 / 原始封包 API / 动态配置 UI / 扩展页）、签名式偏移、多主题、插件市场。",
+  "channel": "stable",
+  "downloads": {
+    "linux-x64": "https://plugins.aprism.top/releases/nekolux-1.0.0-linux-x64.tar.gz",
+    "win32-x64": "https://plugins.aprism.top/releases/nekolux-1.0.0-win32-x64.tar.gz"
+  },
+  "homepage": "https://Nekolux.aprism.top/"
+}
