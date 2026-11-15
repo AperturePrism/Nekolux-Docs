@@ -7,7 +7,6 @@ export default defineConfig({
     base: '/',
     cleanUrls: true,
     lastUpdated: true,
-    sitemap: { hostname: 'https://Nekolux.aprism.top' },
 
     head: [
         ['link', { rel: 'icon', href: '/logo.png' }],
@@ -18,8 +17,10 @@ export default defineConfig({
         // 不写具体宿主软件名、不写实现手法 —— 这些词会把站点暴露给
         // 无关的搜索流量，也会让文档看起来像是针对特定厂商产品的工具。
         ['meta', { name: 'description', content: 'Nekolux —— 轻量、可扩展的 OneBot v11 机器人运行时。插件化架构，支持 Windows / Linux / Docker 部署。' }],
-        ['meta', { name: 'keywords', content: 'OneBot,OneBot11,聊天机器人,机器人框架,插件系统,Docker 部署' }],
-        ['meta', { name: 'robots', content: 'index,follow' }],
+        // 主动从搜索引擎下架：noindex 让已收录页面被移除，nofollow 阻止继续扩散。
+        // 注意顺序：必须先 noindex，等搜索结果清空后才能改 robots.txt Disallow——
+        // 反过来会让爬虫进不来、看不到 noindex，旧页面反而赖在索引里。
+        ['meta', { name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet' }],
         ['link', { rel: 'canonical', href: 'https://Nekolux.aprism.top/' }],
 
         // ── 社交卡片 ──
